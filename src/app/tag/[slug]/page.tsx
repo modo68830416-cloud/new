@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { PaginationPlaceholder } from "@/components/category";
 import { NewsCardGrid } from "@/components/news";
 import { TagFilter } from "@/components/search";
-import { getAllTags, getArticlesByTagSlug, getTagBySlug } from "@/data/mock-search";
+import { getAllTags, getTagBySlug } from "@/data/mock-search";
+import { fetchArticlesByTagSlug } from "@/lib/news-api";
 import { siteConfig } from "@/config/site";
 
 export const dynamicParams = false;
@@ -41,7 +42,7 @@ export default async function TagPage({
   const tag = getTagBySlug(slug);
   if (!tag) notFound();
 
-  const articles = getArticlesByTagSlug(slug);
+  const articles = await fetchArticlesByTagSlug(slug);
   if (articles.length === 0) notFound();
 
   const otherTags = getAllTags()

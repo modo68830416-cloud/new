@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
-import { getArticleBySlug, getRelatedArticles, MOCK_NEWS } from "@/data/mock-news";
+import { MOCK_NEWS } from "@/data/mock-news";
+import { fetchArticleBySlug, fetchRelatedArticles } from "@/lib/news-api";
 import { buildArticleBody, extractHeadings } from "@/data/mock-article-body";
 import { siteConfig } from "@/config/site";
 import { CategoryBadge } from "@/components/ui/category-badge";
@@ -35,7 +36,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await fetchArticleBySlug(slug);
   if (!article) return {};
 
   return {
@@ -56,12 +57,12 @@ export default async function NewsDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await fetchArticleBySlug(slug);
   if (!article) notFound();
 
   const body = buildArticleBody(article);
   const headings = extractHeadings(body);
-  const related = getRelatedArticles(article, 4);
+  const related = await fetchRelatedArticles(article, 4);
   const shareUrl = `${siteConfig.siteUrl}/news/${article.slug}`;
   const hero = article.heroImage ?? article.thumbnail;
 

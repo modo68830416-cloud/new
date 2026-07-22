@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
-  getArticlesByCategory,
-  getLatestArticles,
-  getPopularArticles,
-} from "@/data/mock-news";
+  fetchArticlesByCategory,
+  fetchLatestArticles,
+  fetchPopularArticles,
+} from "@/lib/news-api";
 import { getCategoryBySlug, VISIBLE_CATEGORIES } from "@/constants/categories";
 import { CategoryHeader, PaginationPlaceholder } from "@/components/category";
 import {
@@ -49,16 +49,20 @@ export default async function CategoryPage({
   const category = getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const categoryArticles = getArticlesByCategory(slug);
+  const categoryArticles = await fetchArticlesByCategory(slug);
   if (categoryArticles.length === 0) notFound();
 
-  const latestFirst = getLatestArticles(undefined, categoryArticles);
+  const [latestFirst, popularArticles] = await Promise.all([
+    fetchLatestArticles(undefined, categoryArticles),
+    fetchPopularArticles(10, categoryArticles),
+  ]);
   const featured = categoryArticles.find((article) => article.isFeatured) ?? latestFirst[0];
   const featuredItems = latestFirst.filter((article) => article.id !== featured.id).slice(0, 4);
 
-  const popularItems: RankedNewsListItem[] = getPopularArticles(10, categoryArticles).map(
-    (article, index) => ({ article, rank: index + 1 }),
-  );
+  const popularItems: RankedNewsListItem[] = popularArticles.map((article, index) => ({
+    article,
+    rank: index + 1,
+  }));
 
   return (
     <div className="container-dashboard flex flex-col gap-12 py-8 lg:py-12">

@@ -103,14 +103,29 @@ import하거나 `src/data/mock-news.ts`가 제공하는 헬퍼 함수
 - 브랜드명이 확정되면 `siteConfig.siteName` 등 설정값만 수정하면 되고, 개별
   컴포넌트나 페이지에 서비스명을 하드코딩하지 않는다.
 
-## 9. 향후 API 연결 예정 지점
+## 9. 향후 API 연결 예정 지점 (TASK-012에서 구현)
 
-- `src/data/mock-news.ts`의 `MOCK_NEWS`, `getArticlesByCategory`,
-  `getArticleBySlug`는 이후 실제 데이터 소스(API, CMS, DB 등)로 교체될 가능성이
-  높은 지점이다. 인터페이스(`NewsArticle[]` 반환)를 유지하며 내부 구현만
-  교체하는 방식을 권장한다.
-- `src/data/mock-breaking-news.ts`, `src/data/mock-trending-keywords.ts`도
-  동일한 방식으로 향후 실시간 소스 연동 대상이다.
+TASK-012에서 이 절이 예고한 전환을 실제로 구현했다. `src/data/mock-*.ts`는
+삭제하지 않고 "데이터 소스"로 남기되, 그 위에 비동기 서비스 계층
+(`src/lib/news-api/`)과 이를 노출하는 Route Handler(`src/app/api/`)를
+추가했다.
+
+- `src/lib/news-api/articles.ts`, `breaking-news.ts`, `trending.ts`가
+  `fetchLatestArticles`, `fetchArticleBySlug`, `fetchActiveBreakingNews`,
+  `fetchTrendingKeywords` 등 비동기 함수를 제공한다. 실제 API/CMS/DB로
+  교체할 때는 이 파일들의 내부 구현만 바꾸면 되고, 호출부(페이지/컴포넌트)는
+  그대로 둘 수 있다.
+- `src/app/api/articles`, `src/app/api/articles/[slug]`,
+  `src/app/api/breaking-news`, `src/app/api/trending-keywords` Route
+  Handler가 같은 서비스 계층을 재사용해 REST 형태의 API를 노출한다(향후
+  외부 클라이언트가 호출할 수 있는 지점).
+- 카테고리 · 태그 · 뉴스 상세 페이지는 이 서비스 계층을 `await`로 호출한다.
+- 속보 티커(`BreakingTickerServer`) · 트렌딩 패널(`TrendingPanelServer`) ·
+  Featured/Secondary Hero(`FeaturedHeroServer`, `SecondaryNewsGridServer`)는
+  자주 갱신될 수 있는 데이터이므로 각각 작은 비동기 서버 컴포넌트로 분리해
+  `<Suspense>`로 감싸 스트리밍한다.
+- `src/config/news-api.ts`가 개발 환경 전용 인위적 지연과, 옵트인 실패
+  시뮬레이션(`NEWS_API_SIMULATE_ERRORS=true`)을 관리한다.
 
 ## 10. 다음 Task에서 확장할 영역
 
