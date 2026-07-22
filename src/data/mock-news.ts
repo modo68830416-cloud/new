@@ -55,15 +55,17 @@ const AUTHORS: Author[] = [
   },
 ];
 
-const PLACEHOLDER_COUNT = 6;
-
-function thumbnailFor(index: number, alt: string): MediaAsset {
-  const variant = (index % PLACEHOLDER_COUNT) + 1;
-  const padded = String(variant).padStart(2, "0");
+/**
+ * 카테고리별 그라데이션 메쉬 자리표시자(`public/placeholders/category-*.svg`).
+ * 실제 기사 이미지가 없는 대신, 카테고리 배지와 같은 브랜드 색상(TASK-002
+ * `--color-category-*`)을 사용한 디자인된 배경으로 대체한다 — 이전에는
+ * 카테고리와 무관하게 6종 단색 그라데이션을 순환시켰다.
+ */
+function thumbnailFor(index: number, categorySlug: string, alt: string): MediaAsset {
   return {
-    id: `thumb-${padded}-${index}`,
+    id: `thumb-${categorySlug}-${index}`,
     type: "image",
-    url: `/placeholders/thumb-${padded}.svg`,
+    url: `/placeholders/category-${categorySlug}.svg`,
     alt,
     width: 800,
     height: 450,
@@ -690,7 +692,7 @@ export const MOCK_NEWS: NewsArticle[] = ARTICLE_SPECS.map((spec, index) => ({
   source: resolveSource(spec.sourceId),
   author: resolveAuthor(spec.authorId),
   publishedAt: publishedAtHoursAgo(spec.hoursAgo),
-  thumbnail: thumbnailFor(index, spec.title),
+  thumbnail: thumbnailFor(index, spec.categorySlug, spec.title),
   isBreaking: spec.isBreaking ?? false,
   isFeatured: spec.isFeatured ?? false,
   isExclusive: spec.isExclusive,

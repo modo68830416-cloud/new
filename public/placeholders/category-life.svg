@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bg-life" x1="0" y1="0" x2="1" y2="1" gradientTransform="rotate(-3 0.5 0.5)">
+      <stop offset="0%" stop-color="#fb923c" />
+      <stop offset="100%" stop-color="#5f3717" />
+    </linearGradient>
+    <linearGradient id="sheen-life" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16" />
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+    <filter id="blur-life" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="34" />
+    </filter>
+    <pattern id="dots-life" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#ffffff" opacity="0.16" />
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg-life)" />
+  <g><circle cx="460.2" cy="224.0" r="222.9" fill="#ffffff" opacity="0.16" filter="url(#blur-life)" />
+    <circle cx="509.4" cy="375.5" r="125.8" fill="#fcb880" opacity="0.24" filter="url(#blur-life)" />
+    <circle cx="684.2" cy="187.7" r="124.6" fill="#ffffff" opacity="0.20" filter="url(#blur-life)" /></g>
+  <circle cx="814.2" cy="446.9" r="156.7" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5" />
+  <circle cx="814.2" cy="446.9" r="112.8" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.5" />
+  <rect width="800" height="450" fill="url(#dots-life)" />
+  <rect width="800" height="450" fill="url(#sheen-life)" />
+  <rect width="800" height="450" fill="none" stroke="#8a5021" stroke-opacity="0.25" stroke-width="2" />
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bg-opinion" x1="0" y1="0" x2="1" y2="1" gradientTransform="rotate(4 0.5 0.5)">
+      <stop offset="0%" stop-color="#94a3b8" />
+      <stop offset="100%" stop-color="#383e46" />
+    </linearGradient>
+    <linearGradient id="sheen-opinion" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16" />
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+    <filter id="blur-opinion" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="34" />
+    </filter>
+    <pattern id="dots-opinion" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#ffffff" opacity="0.16" />
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg-opinion)" />
+  <g><circle cx="296.3" cy="86.1" r="228.2" fill="#ffffff" opacity="0.18" filter="url(#blur-opinion)" />
+    <circle cx="359.7" cy="349.1" r="101.2" fill="#b9c3d1" opacity="0.19" filter="url(#blur-opinion)" />
+    <circle cx="320.6" cy="287.4" r="136.6" fill="#ffffff" opacity="0.19" filter="url(#blur-opinion)" /></g>
+  <circle cx="-4.6" cy="57.1" r="142.9" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5" />
+  <circle cx="-4.6" cy="57.1" r="102.9" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.5" />
+  <rect width="800" height="450" fill="url(#dots-opinion)" />
+  <rect width="800" height="450" fill="url(#sheen-opinion)" />
+  <rect width="800" height="450" fill="none" stroke="#515a65" stroke-opacity="0.25" stroke-width="2" />
+</svg>

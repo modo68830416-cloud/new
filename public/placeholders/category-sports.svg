@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bg-sports" x1="0" y1="0" x2="1" y2="1" gradientTransform="rotate(-11 0.5 0.5)">
+      <stop offset="0%" stop-color="#a3e635" />
+      <stop offset="100%" stop-color="#3e5714" />
+    </linearGradient>
+    <linearGradient id="sheen-sports" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16" />
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+    <filter id="blur-sports" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="34" />
+    </filter>
+    <pattern id="dots-sports" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#ffffff" opacity="0.16" />
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg-sports)" />
+  <g><circle cx="81.9" cy="215.8" r="148.8" fill="#ffffff" opacity="0.17" filter="url(#blur-sports)" />
+    <circle cx="311.7" cy="81.5" r="151.2" fill="#c3ef7c" opacity="0.20" filter="url(#blur-sports)" />
+    <circle cx="600.3" cy="281.1" r="149.6" fill="#ffffff" opacity="0.15" filter="url(#blur-sports)" /></g>
+  <circle cx="-11.7" cy="439.2" r="186.2" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5" />
+  <circle cx="-11.7" cy="439.2" r="134.0" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.5" />
+  <rect width="800" height="450" fill="url(#dots-sports)" />
+  <rect width="800" height="450" fill="url(#sheen-sports)" />
+  <rect width="800" height="450" fill="none" stroke="#5a7f1d" stroke-opacity="0.25" stroke-width="2" />
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bg-culture" x1="0" y1="0" x2="1" y2="1" gradientTransform="rotate(6 0.5 0.5)">
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="100%" stop-color="#5a1b3a" />
+    </linearGradient>
+    <linearGradient id="sheen-culture" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16" />
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+    <filter id="blur-culture" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="34" />
+    </filter>
+    <pattern id="dots-culture" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#ffffff" opacity="0.16" />
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg-culture)" />
+  <g><circle cx="685.4" cy="119.1" r="229.9" fill="#ffffff" opacity="0.15" filter="url(#blur-culture)" />
+    <circle cx="582.4" cy="111.5" r="219.9" fill="#f388bd" opacity="0.23" filter="url(#blur-culture)" />
+    <circle cx="479.4" cy="228.0" r="121.5" fill="#ffffff" opacity="0.21" filter="url(#blur-culture)" /></g>
+  <circle cx="784.5" cy="102.2" r="207.3" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5" />
+  <circle cx="784.5" cy="102.2" r="149.3" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.5" />
+  <rect width="800" height="450" fill="url(#dots-culture)" />
+  <rect width="800" height="450" fill="url(#sheen-culture)" />
+  <rect width="800" height="450" fill="none" stroke="#822854" stroke-opacity="0.25" stroke-width="2" />
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bg-it-science" x1="0" y1="0" x2="1" y2="1" gradientTransform="rotate(12 0.5 0.5)">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#35235d" />
+    </linearGradient>
+    <linearGradient id="sheen-it-science" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16" />
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+    <filter id="blur-it-science" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="34" />
+    </filter>
+    <pattern id="dots-it-science" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#ffffff" opacity="0.16" />
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg-it-science)" />
+  <g><circle cx="572.8" cy="313.8" r="225.1" fill="#ffffff" opacity="0.23" filter="url(#blur-it-science)" />
+    <circle cx="640.0" cy="123.4" r="96.2" fill="#b495f9" opacity="0.24" filter="url(#blur-it-science)" />
+    <circle cx="681.6" cy="165.3" r="204.7" fill="#ffffff" opacity="0.17" filter="url(#blur-it-science)" /></g>
+  <circle cx="-71.4" cy="292.1" r="181.9" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5" />
+  <circle cx="-71.4" cy="292.1" r="131.0" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.5" />
+  <rect width="800" height="450" fill="url(#dots-it-science)" />
+  <rect width="800" height="450" fill="url(#sheen-it-science)" />
+  <rect width="800" height="450" fill="none" stroke="#4c3387" stroke-opacity="0.25" stroke-width="2" />
+</svg>

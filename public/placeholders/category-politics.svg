@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bg-politics" x1="0" y1="0" x2="1" y2="1" gradientTransform="rotate(-5 0.5 0.5)">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#16315d" />
+    </linearGradient>
+    <linearGradient id="sheen-politics" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16" />
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+    <filter id="blur-politics" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="34" />
+    </filter>
+    <pattern id="dots-politics" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#ffffff" opacity="0.16" />
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg-politics)" />
+  <g><circle cx="302.1" cy="263.3" r="223.8" fill="#ffffff" opacity="0.23" filter="url(#blur-politics)" />
+    <circle cx="626.6" cy="148.8" r="132.7" fill="#80aef9" opacity="0.18" filter="url(#blur-politics)" />
+    <circle cx="183.0" cy="385.4" r="132.3" fill="#ffffff" opacity="0.21" filter="url(#blur-politics)" /></g>
+  <circle cx="838.4" cy="0.0" r="162.4" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5" />
+  <circle cx="838.4" cy="0.0" r="116.9" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.5" />
+  <rect width="800" height="450" fill="url(#dots-politics)" />
+  <rect width="800" height="450" fill="url(#sheen-politics)" />
+  <rect width="800" height="450" fill="none" stroke="#204887" stroke-opacity="0.25" stroke-width="2" />
+</svg>
