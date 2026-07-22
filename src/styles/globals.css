@@ -1,24 +1,159 @@
 @import "tailwindcss";
+@import "./tokens.css";
+@import "./utilities.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* =============================================================================
+ * Tailwind theme wiring (TASK-002)
+ * -----------------------------------------------------------------------------
+ * `@theme inline`은 tokens.css에 선언된 런타임 CSS 변수를 그대로 참조해 Tailwind
+ * 유틸리티 클래스를 생성한다 (예: --color-background → bg-background,
+ * text-background, border-background). 값을 이 블록에 다시 하드코딩하지 않고
+ * 항상 tokens.css의 변수를 var()로 참조한다.
+ * ========================================================================== */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Color — background & surface */
+  --color-background: var(--color-background);
+  --color-background-secondary: var(--color-background-secondary);
+  --color-surface: var(--color-surface);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-surface-overlay: var(--color-surface-overlay);
+
+  /* Color — text */
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-inverse: var(--color-text-inverse);
+  --color-text-link-visited: var(--color-text-link-visited);
+
+  /* Color — border */
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-default: var(--color-border-default);
+  --color-border-strong: var(--color-border-strong);
+  --color-border-accent: var(--color-border-accent);
+  --color-border-breaking: var(--color-border-breaking);
+  --color-border-focus: var(--color-border-focus);
+
+  /* Color — accent */
+  --color-accent-primary: var(--color-accent-primary);
+  --color-accent-primary-strong: var(--color-accent-primary-strong);
+  --color-accent-secondary: var(--color-accent-secondary);
+  --color-accent-secondary-strong: var(--color-accent-secondary-strong);
+
+  /* Color — news importance / status */
+  --color-breaking: var(--color-breaking);
+  --color-breaking-strong: var(--color-breaking-strong);
+  --color-urgent: var(--color-urgent);
+  --color-critical: var(--color-critical);
+  --color-live: var(--color-live);
+  --color-verified: var(--color-verified);
+  --color-exclusive: var(--color-exclusive);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-info: var(--color-info);
+
+  /* Color — category */
+  --color-category-breaking: var(--color-category-breaking);
+  --color-category-politics: var(--color-category-politics);
+  --color-category-economy: var(--color-category-economy);
+  --color-category-society: var(--color-category-society);
+  --color-category-world: var(--color-category-world);
+  --color-category-industry: var(--color-category-industry);
+  --color-category-it-science: var(--color-category-it-science);
+  --color-category-culture: var(--color-category-culture);
+  --color-category-entertainment: var(--color-category-entertainment);
+  --color-category-sports: var(--color-category-sports);
+  --color-category-life: var(--color-category-life);
+  --color-category-opinion: var(--color-category-opinion);
+
+  /* Color — chart */
+  --color-chart-1: var(--color-chart-1);
+  --color-chart-2: var(--color-chart-2);
+  --color-chart-3: var(--color-chart-3);
+  --color-chart-4: var(--color-chart-4);
+  --color-chart-5: var(--color-chart-5);
+  --color-chart-6: var(--color-chart-6);
+
+  /* Color — overlay & focus */
+  --color-overlay-scrim: var(--color-overlay-scrim);
+  --color-overlay-hero: var(--color-overlay-hero);
+  --color-focus-ring: var(--color-focus-ring);
+
+  /* Font families */
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+
+  /* Font sizes (+ paired line-height / letter-spacing) */
+  --text-xs: var(--text-xs);
+  --text-xs--line-height: var(--leading-normal);
+  --text-sm: var(--text-sm);
+  --text-sm--line-height: 1.55;
+  --text-base: var(--text-base);
+  --text-base--line-height: var(--leading-normal);
+  --text-lg: var(--text-lg);
+  --text-lg--line-height: 1.5;
+  --text-xl: var(--text-xl);
+  --text-xl--line-height: 1.45;
+  --text-2xl: var(--text-2xl);
+  --text-2xl--line-height: 1.35;
+  --text-3xl: var(--text-3xl);
+  --text-3xl--line-height: 1.28;
+  --text-4xl: var(--text-4xl);
+  --text-4xl--line-height: 1.2;
+  --text-5xl: var(--text-5xl);
+  --text-5xl--line-height: 1.12;
+  --text-5xl--letter-spacing: var(--tracking-tight);
+  --text-6xl: var(--text-6xl);
+  --text-6xl--line-height: 1.08;
+  --text-6xl--letter-spacing: var(--tracking-tighter);
+  --text-7xl: var(--text-7xl);
+  --text-7xl--line-height: 1.05;
+  --text-7xl--letter-spacing: var(--tracking-tighter);
+  --text-8xl: var(--text-8xl);
+  --text-8xl--line-height: 1.02;
+  --text-8xl--letter-spacing: var(--tracking-tighter);
+
+  /* Radius */
+  --radius-none: var(--radius-none);
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-full);
+
+  /* Shadow */
+  --shadow-none: var(--shadow-none);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-glow: var(--shadow-glow);
+  --shadow-breaking: var(--shadow-breaking);
+
+  /* Blur (backdrop-blur-low/medium/high + blur-low/medium/high) */
+  --blur-low: var(--blur-low);
+  --blur-medium: var(--blur-medium);
+  --blur-high: var(--blur-high);
+
+  /* Easing */
+  --ease-standard: var(--ease-standard);
+  --ease-enter: var(--ease-enter);
+  --ease-exit: var(--ease-exit);
+  --ease-emphasis: var(--ease-emphasis);
+  --ease-spring: var(--ease-spring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* 브레이크포인트는 컴파일 타임 상수여야 하므로 inline이 아닌 정적 값으로 선언한다.
+ * 기존 Tailwind 기본 브레이크포인트(sm/md/lg/xl/2xl)는 그대로 유지하고,
+ * "large mobile" 구간(430px 전후)만 xs로 보강한다. */
+@theme {
+  --breakpoint-xs: 26.875rem; /* 430px */
 }
 
+/* =============================================================================
+ * Base / reset (TASK-002 — globals.css 역할 범위)
+ * ========================================================================== */
 *,
 *::before,
 *::after {
@@ -35,19 +170,18 @@ body {
 
 html {
   height: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
   min-height: 100%;
-  background: var(--background);
-  color: var(--foreground);
-  font-family:
-    var(--font-sans),
-    system-ui,
-    -apple-system,
-    "Malgun Gothic",
-    sans-serif;
-  line-height: 1.6;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 img,
@@ -59,7 +193,7 @@ video {
 
 a {
   color: inherit;
-  text-decoration: underline;
+  text-decoration-color: var(--color-border-strong);
   text-underline-offset: 2px;
 }
 
@@ -67,7 +201,57 @@ a:hover {
   text-decoration-thickness: 2px;
 }
 
+a:visited {
+  color: var(--color-text-link-visited);
+}
+
+/* 선택 영역 */
+::selection {
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-inverse);
+}
+
+/* 스크롤바 (Firefox) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+/* 스크롤바 (WebKit 계열) */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-strong);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-background);
+}
+
+/* 포커스 — outline을 제거하지 않고 명확하게 보이도록 유지 (섹션 15.2) */
 :focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* 모션 감소 환경 대응 (섹션 14.3, 15.4) */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
