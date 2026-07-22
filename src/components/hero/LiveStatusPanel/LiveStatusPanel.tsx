@@ -33,7 +33,12 @@ const clockFormatter = new Intl.DateTimeFormat("ko-KR", {
  * 있으므로 heading에는 고정 id를 부여하지 않는다 (중복 id 방지). 랜드마크
  * 역할은 상위(`HeroSection`)의 `<section aria-label>`이 담당한다.
  */
-export function LiveStatusPanel({ className }: LiveStatusPanelProps) {
+export function LiveStatusPanel({
+  todayArticleCount,
+  breakingCount,
+  lastUpdatedAt,
+  className,
+}: LiveStatusPanelProps) {
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -41,13 +46,15 @@ export function LiveStatusPanel({ className }: LiveStatusPanelProps) {
     return () => clearInterval(id);
   }, []);
 
-  const todayArticleCount = MOCK_NEWS.length;
-  const breakingCount = MOCK_BREAKING_NEWS.filter((item) => item.isActive).length;
-  const lastUpdatedAt = MOCK_BREAKING_NEWS[0]?.timestamp ?? MOCK_NEWS[0]?.publishedAt;
+  const resolvedTodayArticleCount = todayArticleCount ?? MOCK_NEWS.length;
+  const resolvedBreakingCount =
+    breakingCount ?? MOCK_BREAKING_NEWS.filter((item) => item.isActive).length;
+  const resolvedLastUpdatedAt =
+    lastUpdatedAt ?? MOCK_BREAKING_NEWS[0]?.timestamp ?? MOCK_NEWS[0]?.publishedAt;
 
   const stats: { icon: typeof Newspaper; label: string; value: string }[] = [
-    { icon: Newspaper, label: "오늘 등록된 기사", value: `${todayArticleCount}건` },
-    { icon: Radio, label: "진행 중인 속보", value: `${breakingCount}건` },
+    { icon: Newspaper, label: "오늘 등록된 기사", value: `${resolvedTodayArticleCount}건` },
+    { icon: Radio, label: "진행 중인 속보", value: `${resolvedBreakingCount}건` },
   ];
 
   return (
@@ -91,7 +98,7 @@ export function LiveStatusPanel({ className }: LiveStatusPanelProps) {
 
         <p className="type-caption">
           최근 업데이트{" "}
-          {lastUpdatedAt ? <TimeAgo date={lastUpdatedAt} /> : "정보 없음"}
+          {resolvedLastUpdatedAt ? <TimeAgo date={resolvedLastUpdatedAt} /> : "정보 없음"}
         </p>
       </Card>
     </div>

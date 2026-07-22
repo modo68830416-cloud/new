@@ -127,6 +127,28 @@ TASK-012에서 이 절이 예고한 전환을 실제로 구현했다. `src/data/
 - `src/config/news-api.ts`가 개발 환경 전용 인위적 지연과, 옵트인 실패
   시뮬레이션(`NEWS_API_SIMULATE_ERRORS=true`)을 관리한다.
 
+## 9.1 검색 서버 사이드 전환 · 실시간 현황 스트리밍 · 캐시 재검증 (TASK-013)
+
+- `src/lib/news-api/search.ts`의 `fetchSearchResults`가 `mock-search.ts`의
+  `searchArticles`를 감싼다. `GET /api/search`가 이를 재사용하고,
+  `SearchPageContent`(클라이언트 컴포넌트)는 더 이상 `searchArticles`를
+  직접 호출하지 않고 이 API를 debounce + `AbortController`로 호출한다.
+  로딩/에러 상태는 TASK-007/010에서 이미 준비돼 있던
+  `SearchResults`/`NewsCardGrid`의 `isLoading`/`error`/`onRetry` prop을
+  그대로 사용한다.
+- `src/lib/news-api/live-status.ts`의 `fetchLiveStatus`가 `LiveStatusPanel`의
+  통계(오늘 기사 수, 진행 중 속보 수, 최근 업데이트)를 제공한다.
+  `LiveStatusPanelServer`가 이를 호출해 다른 Hero 위젯과 동일하게
+  `<Suspense>`로 스트리밍된다. 1초 tick 실시간 시계는 서버 데이터가 아니므로
+  클라이언트 상태로 남아 있다.
+- 이 프로젝트는 Cache Components(`use cache`)를 켜지 않았으므로
+  (`next.config.ts`에 `cacheComponents: true` 없음), `fetchActiveBreakingNews`/
+  `fetchTrendingKeywords`는 "이전 모델" 캐시 API인 `unstable_cache`로 각각
+  30초/60초 TTL과 태그(`breaking-news`/`trending-keywords`)를 갖는다.
+  `POST /api/revalidate`가 시크릿 헤더 검증 후 `revalidateTag(tag, { expire: 0 })`를
+  호출해 즉시 무효화한다. 실제 이벤트(속보 발행 등)가 이 엔드포인트를
+  호출하는 파이프라인은 아직 없다 — 엔드포인트만 제공한다.
+
 ## 10. 다음 Task에서 확장할 영역
 
 - 실제 메인 화면 레이아웃과 뉴스 카드, 히어로 영역 등 시각적 컴포넌트 구현

@@ -8,7 +8,7 @@ import { HeroBackground } from "@/components/hero/HeroBackground";
 import { FeaturedHeroServer } from "@/components/hero/FeaturedHero";
 import { SecondaryNewsGridServer } from "@/components/hero/SecondaryNewsGrid";
 import { TrendingPanelServer } from "@/components/hero/TrendingPanel";
-import { LiveStatusPanel } from "@/components/hero/LiveStatusPanel";
+import { LiveStatusPanelServer } from "@/components/hero/LiveStatusPanel";
 import { MarketWeatherStrip } from "@/components/hero/MarketWeatherStrip";
 import { cn } from "@/lib/utils";
 import type { HeroSectionProps } from "./HeroSection.types";
@@ -63,6 +63,20 @@ function TrendingPanelSkeleton() {
   );
 }
 
+/** TASK-013 — `LiveStatusPanelServer`의 Suspense fallback */
+function LiveStatusPanelSkeleton() {
+  return (
+    <Card className="flex h-full flex-col gap-5">
+      <Skeleton className="h-6 w-32" />
+      <Skeleton className="h-10 w-40" />
+      <div className="grid grid-cols-2 gap-3">
+        <Skeleton className="h-14 w-full" />
+        <Skeleton className="h-14 w-full" />
+      </div>
+    </Card>
+  );
+}
+
 /**
  * TASK-006 홈페이지 첫 화면(Above the Fold) — 메인 Hero.
  *
@@ -108,7 +122,9 @@ export function HeroSection({ className, secondaryGridId = "secondary-news" }: H
             <Suspense fallback={<TrendingPanelSkeleton />}>
               <TrendingPanelServer />
             </Suspense>
-            <LiveStatusPanel />
+            <Suspense fallback={<LiveStatusPanelSkeleton />}>
+              <LiveStatusPanelServer />
+            </Suspense>
           </div>
         </div>
 
