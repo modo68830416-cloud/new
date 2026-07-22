@@ -1,25 +1,27 @@
 import Image from "next/image";
-import { ArrowRight, Share2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Surface } from "@/components/ui/surface";
 import { CategoryBadge } from "@/components/ui/category-badge";
 import { BreakingBadge } from "@/components/ui/breaking-badge";
-import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
+import { LinkButton } from "@/components/ui/link-button";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { ViewCount } from "@/components/ui/view-count";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { getFeaturedHeroArticle } from "@/lib/hero-articles";
+import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { FeaturedHeroShareButton } from "./FeaturedHeroShareButton";
 import type { FeaturedHeroProps } from "./FeaturedHero.types";
 
 /**
  * Hero의 메인 헤드라인(Featured News).
  *
  * 대표 이미지 · 카테고리 배지 · 제목 · 요약 · 발행 시각 · 조회수 ·
- * 공유 버튼(UI) · 읽기 버튼을 표시한다. TASK-001 mock 데이터를 사용하며,
- * 실제 상세 페이지가 아직 없으므로 읽기/공유 버튼은 UI만 제공한다
- * (기존 Header의 "준비 중" 패턴과 동일하게 `aria-disabled` + `title`로
- * 상태를 알린다).
+ * 공유 버튼 · 읽기 버튼을 표시한다. TASK-001 mock 데이터를 사용한다.
+ *
+ * "기사 읽기"/공유 버튼은 TASK-006에서는 상세 페이지가 없어 UI만 제공하는
+ * placeholder였지만, TASK-009에서 `/news/[slug]` 상세 페이지가 생기고
+ * TASK-014에서 실제로 연결했다.
  */
 export function FeaturedHero({ article, className }: FeaturedHeroProps) {
   const featured = article ?? getFeaturedHeroArticle();
@@ -77,21 +79,17 @@ export function FeaturedHero({ article, className }: FeaturedHeroProps) {
           </div>
 
           <div className="mt-2 flex items-center gap-3">
-            <Button
+            <LinkButton
+              href={`/news/${featured.slug}`}
               variant="primary"
               rightIcon={<ArrowRight size={16} aria-hidden />}
               className="shadow-glow"
-              aria-disabled="true"
-              title="기사 상세 페이지 준비 중"
             >
               기사 읽기
-            </Button>
-            <IconButton
-              label="공유하기 (준비 중)"
-              title="공유하기 (준비 중)"
-              icon={<Share2 size={18} aria-hidden />}
-              variant="secondary"
-              aria-disabled="true"
+            </LinkButton>
+            <FeaturedHeroShareButton
+              title={featured.title}
+              url={`${siteConfig.siteUrl}/news/${featured.slug}`}
             />
           </div>
         </div>

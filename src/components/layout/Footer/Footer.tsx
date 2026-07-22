@@ -10,7 +10,7 @@ export interface FooterProps {
 
 /**
  * 전역 Footer. 사이트명/설명, 카테고리 바로가기, 이용약관·개인정보처리방침
- * 자리(placeholder — 실제 페이지는 이후 Task), 문의 이메일, Copyright를
+ * (TASK-014에서 `/terms`, `/privacy`로 연결), 문의 이메일, Copyright를
  * 포함한다.
  */
 export function Footer({ className }: FooterProps) {
@@ -60,24 +60,20 @@ export function Footer({ className }: FooterProps) {
           </p>
           <ul className="flex items-center gap-4">
             <li>
-              <a
-                href="#"
-                aria-disabled="true"
-                title="준비 중"
+              <Link
+                href="/terms"
                 className="type-caption text-text-muted hover:text-text-primary"
               >
                 이용약관
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="#"
-                aria-disabled="true"
-                title="준비 중"
+              <Link
+                href="/privacy"
                 className="type-caption text-text-muted hover:text-text-primary"
               >
                 개인정보처리방침
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
