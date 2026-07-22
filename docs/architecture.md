@@ -160,6 +160,24 @@ TASK-012에서 이 절이 예고한 전환을 실제로 구현했다. `src/data/
   전환됐다. "최근 검색어"는 사용자 로컬 `localStorage` 전용이라(TASK-010,
   TASK-011과 동일한 원칙) 서버로 옮기지 않는다.
 
+## 9.3 뉴스 카드 공유 버튼 연결 (TASK-016)
+
+- TASK-007에서 만든 `NewsShareAction`(공유 버튼 UI primitive, stretched
+  link 위에서 독립적으로 클릭되는 stacking 처리만 담당)이 TASK-014 전까지는
+  어떤 카드에도 실제로 렌더링되지 않았다. `src/components/news/primitives/news-share-button.tsx`의
+  `NewsShareButton`이 `article`을 받아 `useShareArticle`(TASK-014)로 실제
+  공유 동작을 연결하고, `NewsShareAction`을 그대로 렌더링한다 —
+  `BookmarkButton`(TASK-011)과 동일한 "동작은 이 컴포넌트, 표현은 기존
+  primitive" 역할 분담이다.
+- 카드 9종(`StandardNewsCard`, `BreakingNewsCard`, `FeaturedNewsCard`,
+  `HorizontalNewsCard`, `OpinionNewsCard`, `VideoNewsCard`,
+  `CompactNewsCard`, `RankedNewsCard`, `PhotoNewsCard`) 모두 기존
+  `BookmarkButton` 배치 방식(`ml-auto` 우측 정렬 / `shrink-0` / 사진 카드의
+  이미지 위 절대 위치)을 그대로 따라 `NewsShareButton`을 그 옆에 추가했다.
+- `useShareArticle`은 결과별 Toast 안내(성공/복사됨/실패)까지 훅 내부에서
+  처리하도록 정리해, `FeaturedHeroShareButton`과 `NewsShareButton`이 모두
+  같은 분기를 반복하지 않는다.
+
 ## 10. 다음 Task에서 확장할 영역
 
 - 실제 메인 화면 레이아웃과 뉴스 카드, 히어로 영역 등 시각적 컴포넌트 구현

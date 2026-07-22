@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CategoryBadge } from "@/components/ui/category-badge";
 import { BookmarkButton } from "@/components/personalization/bookmark-button";
+import { NewsShareButton } from "../primitives/news-share-button";
 import { NewsImage } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsCardMeta } from "../primitives/news-meta";
@@ -65,12 +66,10 @@ export function VideoNewsCard({
         <div className="flex flex-1 flex-col gap-2 p-4">
           <div className="flex items-center gap-2">
             <CategoryBadge category={article.category} size="sm" className="w-fit" />
-            <BookmarkButton
-              articleId={article.id}
-              slug={article.slug}
-              size="sm"
-              className="ml-auto"
-            />
+            <div className="ml-auto flex items-center gap-1">
+              <NewsShareButton article={article} />
+              <BookmarkButton articleId={article.id} slug={article.slug} size="sm" />
+            </div>
           </div>
           <NewsTitle level={titleLevel} size="md" lineClamp={2}>
             <NewsCardLink href={`/news/${article.slug}`}>{article.title}</NewsCardLink>

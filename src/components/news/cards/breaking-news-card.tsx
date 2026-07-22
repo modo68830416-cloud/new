@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { designSystemConfig } from "@/config/design-system";
+import { NewsShareButton } from "../primitives/news-share-button";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
 import { cn } from "@/lib/utils";
@@ -64,12 +65,10 @@ export function BreakingNewsCard({
               {topicLabel}
             </Badge>
           )}
-          <BookmarkButton
-            articleId={article.id}
-            slug={article.slug}
-            size="sm"
-            className="ml-auto"
-          />
+          <div className="ml-auto flex items-center gap-1">
+            <NewsShareButton article={article} />
+            <BookmarkButton articleId={article.id} slug={article.slug} size="sm" />
+          </div>
         </div>
 
         <NewsTitle level={titleLevel} size="md" lineClamp={2}>

@@ -15,6 +15,7 @@ export { NewsSummary } from "./primitives/news-summary";
 export { NewsCardMeta } from "./primitives/news-meta";
 export { NewsSourceLine } from "./primitives/news-source";
 export { NewsShareAction } from "./primitives/news-actions";
+export { NewsShareButton } from "./primitives/news-share-button";
 export { NewsCardLink, newsCardContainerClassName } from "./primitives/news-card-link";
 
 // Cards

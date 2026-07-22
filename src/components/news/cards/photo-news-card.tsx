@@ -1,6 +1,7 @@
 import { Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "@/components/personalization/bookmark-button";
+import { NewsShareButton } from "../primitives/news-share-button";
 import { NewsImage } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
@@ -42,12 +43,10 @@ export function PhotoNewsCard({
                   사진
                 </Badge>
               </div>
-              <BookmarkButton
-                articleId={article.id}
-                slug={article.slug}
-                size="sm"
-                className="absolute top-3 right-3"
-              />
+              <div className="absolute top-3 right-3 z-content flex items-center gap-1.5">
+                <NewsShareButton article={article} />
+                <BookmarkButton articleId={article.id} slug={article.slug} size="sm" />
+              </div>
               <div className="absolute inset-x-0 bottom-0 z-content flex flex-col gap-1 p-4">
                 <span className="type-metadata text-text-secondary">
                   {article.category.name}

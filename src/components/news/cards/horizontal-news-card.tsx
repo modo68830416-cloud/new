@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { CategoryBadge } from "@/components/ui/category-badge";
 import { BookmarkButton } from "@/components/personalization/bookmark-button";
+import { NewsShareButton } from "../primitives/news-share-button";
 import { NewsImage } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsSummary } from "../primitives/news-summary";
@@ -57,12 +58,10 @@ export function HorizontalNewsCard({
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-3 sm:p-4">
           <div className="flex items-center gap-2">
             <CategoryBadge category={article.category} size="sm" className="w-fit" />
-            <BookmarkButton
-              articleId={article.id}
-              slug={article.slug}
-              size="sm"
-              className="ml-auto"
-            />
+            <div className="ml-auto flex items-center gap-1">
+              <NewsShareButton article={article} />
+              <BookmarkButton articleId={article.id} slug={article.slug} size="sm" />
+            </div>
           </div>
           <NewsTitle
             level={titleLevel}
