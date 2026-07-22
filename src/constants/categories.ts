@@ -1,0 +1,120 @@
+import type { NewsCategory } from "@/types/news";
+
+export const CATEGORIES: NewsCategory[] = [
+  {
+    id: "cat-breaking",
+    slug: "breaking",
+    name: "속보",
+    shortName: "속보",
+    description: "지금 막 들어온 속보 뉴스",
+    order: 0,
+    isVisible: true,
+  },
+  {
+    id: "cat-politics",
+    slug: "politics",
+    name: "정치",
+    shortName: "정치",
+    description: "국내외 정치 소식",
+    order: 1,
+    isVisible: true,
+  },
+  {
+    id: "cat-economy",
+    slug: "economy",
+    name: "경제",
+    shortName: "경제",
+    description: "경제, 금융, 산업 동향",
+    order: 2,
+    isVisible: true,
+  },
+  {
+    id: "cat-society",
+    slug: "society",
+    name: "사회",
+    shortName: "사회",
+    description: "사회 전반의 이슈",
+    order: 3,
+    isVisible: true,
+  },
+  {
+    id: "cat-world",
+    slug: "world",
+    name: "국제",
+    shortName: "국제",
+    description: "해외 주요 뉴스",
+    order: 4,
+    isVisible: true,
+  },
+  {
+    id: "cat-industry",
+    slug: "industry",
+    name: "산업",
+    shortName: "산업",
+    description: "산업 및 기업 소식",
+    order: 5,
+    isVisible: true,
+  },
+  {
+    id: "cat-it-science",
+    slug: "it-science",
+    name: "IT·과학",
+    shortName: "IT",
+    description: "기술과 과학 소식",
+    order: 6,
+    isVisible: true,
+  },
+  {
+    id: "cat-culture",
+    slug: "culture",
+    name: "문화",
+    shortName: "문화",
+    description: "문화, 예술 소식",
+    order: 7,
+    isVisible: true,
+  },
+  {
+    id: "cat-entertainment",
+    slug: "entertainment",
+    name: "연예",
+    shortName: "연예",
+    description: "연예계 소식",
+    order: 8,
+    isVisible: true,
+  },
+  {
+    id: "cat-sports",
+    slug: "sports",
+    name: "스포츠",
+    shortName: "스포츠",
+    description: "스포츠 소식",
+    order: 9,
+    isVisible: true,
+  },
+  {
+    id: "cat-life",
+    slug: "life",
+    name: "라이프",
+    shortName: "라이프",
+    description: "생활 정보 및 트렌드",
+    order: 10,
+    isVisible: true,
+  },
+  {
+    id: "cat-opinion",
+    slug: "opinion",
+    name: "오피니언",
+    shortName: "오피니언",
+    description: "칼럼과 사설",
+    order: 11,
+    isVisible: true,
+  },
+];
+
+export const VISIBLE_CATEGORIES: NewsCategory[] = CATEGORIES.filter(
+  (category) => category.isVisible,
+).sort((a, b) => a.order - b.order);
+
+export function getCategoryBySlug(slug: string): NewsCategory | undefined {
+  return CATEGORIES.find((category) => category.slug === slug);
+}
