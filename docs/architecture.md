@@ -149,6 +149,17 @@ TASK-012에서 이 절이 예고한 전환을 실제로 구현했다. `src/data/
   호출해 즉시 무효화한다. 실제 이벤트(속보 발행 등)가 이 엔드포인트를
   호출하는 파이프라인은 아직 없다 — 엔드포인트만 제공한다.
 
+## 9.2 검색 자동완성 · 인기 검색어 서버 사이드 전환 (TASK-015)
+
+- `src/lib/news-api/suggestions.ts`의 `fetchAutocompleteSuggestions`가
+  `mock-search.ts`의 `getAutocompleteSuggestions`를 감싼다.
+  `GET /api/search/suggestions`가 이를 재사용한다.
+- "인기 검색어"는 트렌딩 키워드와 데이터가 같으므로 별도 엔드포인트 없이
+  기존 `GET /api/trending-keywords`(TASK-012)를 그대로 재사용한다.
+- `useSearchCombobox`가 자동완성/인기 검색어를 각각 이 API로 조회하도록
+  전환됐다. "최근 검색어"는 사용자 로컬 `localStorage` 전용이라(TASK-010,
+  TASK-011과 동일한 원칙) 서버로 옮기지 않는다.
+
 ## 10. 다음 Task에서 확장할 영역
 
 - 실제 메인 화면 레이아웃과 뉴스 카드, 히어로 영역 등 시각적 컴포넌트 구현

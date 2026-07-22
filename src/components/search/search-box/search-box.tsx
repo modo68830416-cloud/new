@@ -30,8 +30,9 @@ export interface SearchBoxProps {
  *   드롭다운(ARIA 1.2 콤보박스 패턴, `aria-activedescendant`로 강조).
  * - ArrowUp/ArrowDown/Enter 키보드 탐색, Escape 닫기, Clear 버튼은
  *   `useSearchCombobox` 훅이 관리한다.
- * - debounce 구조를 준비해 두었지만 실제 검색 API 호출은 없다 — 자동완성은
- *   `@/data/mock-search`의 mock 데이터만 사용한다.
+ * - 자동완성은 `/api/search/suggestions`, 인기 검색어는 `/api/trending-keywords`를
+ *   호출한다(TASK-015). 최근 검색어는 여전히 사용자 로컬(`localStorage`)
+ *   전용이라 서버로 옮기지 않는다.
  * - 입력 자체는 TASK-003 `SearchInput`을 그대로 재사용한다(검색 아이콘,
  *   사이즈, Clear 버튼 렌더링은 그 컴포넌트가 이미 제공한다).
  */
@@ -58,6 +59,7 @@ export function SearchBox({
     recentOptions,
     popularOptions,
     suggestionGroups,
+    isLoadingSuggestions,
     selectOption,
     handleChange,
     handleClear,
@@ -70,6 +72,8 @@ export function SearchBox({
   const hasDropdownContent = showSuggestions
     ? suggestionGroups.length > 0
     : recentOptions.length > 0 || popularOptions.length > 0;
+  // 자동완성 응답을 기다리는 동안 "결과 없음" 문구가 잠깐 깜빡이지 않도록 한다.
+  const showEmptyMessage = !hasDropdownContent && !(showSuggestions && isLoadingSuggestions);
 
   return (
     <div role="search" aria-label={ariaLabel} className={cn("relative w-full", containerClassName)}>
@@ -104,7 +108,7 @@ export function SearchBox({
             "max-h-96",
           )}
         >
-          {!hasDropdownContent && (
+          {showEmptyMessage && (
             <p className="type-caption px-3 py-6 text-center text-text-muted">
               {showSuggestions ? "일치하는 추천 결과가 없습니다." : "최근/인기 검색어가 없습니다."}
             </p>

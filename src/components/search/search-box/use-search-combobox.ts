@@ -1,15 +1,11 @@
 "use client";
 
-import { useMemo, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useRecentSearches } from "@/components/search/recent-searches";
-import {
-  getAutocompleteSuggestions,
-  getPopularSearchKeywords,
-  type SuggestionGroup,
-  type SuggestionOption,
-} from "@/data/mock-search";
+import type { SuggestionGroup, SuggestionOption } from "@/data/mock-search";
+import type { TrendingKeyword } from "@/types/news";
 
 export interface UseSearchComboboxOptions {
   initialValue?: string;
@@ -17,15 +13,30 @@ export interface UseSearchComboboxOptions {
   onSearch?: (query: string) => void;
 }
 
+function toPopularOption(keyword: TrendingKeyword): SuggestionOption {
+  return {
+    id: `option-popular-${keyword.id}`,
+    type: "popular",
+    label: keyword.keyword,
+    href: `/search?q=${encodeURIComponent(keyword.keyword)}`,
+    rank: keyword.rank,
+    change: keyword.change,
+  };
+}
+
 /**
- * SearchBox의 콤보박스 상태/키보드 탐색 로직 (TASK-010).
+ * SearchBox의 콤보박스 상태/키보드 탐색 로직 (TASK-010, TASK-015에서
+ * 자동완성/인기 검색어를 서버 사이드로 전환).
  *
- * - 검색어 debounce 구조를 준비한다(`useDebouncedValue`) — 실제 API 호출은
- *   없지만, mock 자동완성 계산에 그대로 적용해 추후 API 연동 시 구조를
- *   재사용할 수 있다.
+ * - 자동완성(기사/카테고리/태그/추천 검색어)은 `/api/search/suggestions`,
+ *   인기 검색어는 기존 `/api/trending-keywords`(TASK-012)를 그대로
+ *   재사용한다 — "인기 검색어"는 트렌딩 키워드와 같은 데이터이므로 별도
+ *   엔드포인트를 새로 만들지 않는다.
+ * - "최근 검색어"는 사용자 로컬(`localStorage`) 전용이라 서버로 옮기지
+ *   않는다(`useRecentSearches`, TASK-010 그대로).
  * - 검색어가 비어 있으면 최근 검색어 + 인기 검색어를, 입력 중이면 자동완성
- *   그룹(기사/카테고리/태그/추천 검색어)을 하나의 평탄화된 옵션 목록으로
- *   합쳐 ArrowUp/ArrowDown/Enter 키보드 탐색을 지원한다.
+ *   그룹을 하나의 평탄화된 옵션 목록으로 합쳐 ArrowUp/ArrowDown/Enter
+ *   키보드 탐색을 지원한다.
  */
 export function useSearchCombobox({ initialValue = "", onSearch }: UseSearchComboboxOptions = {}) {
   const router = useRouter();
@@ -34,8 +45,65 @@ export function useSearchCombobox({ initialValue = "", onSearch }: UseSearchComb
   const [activeIndex, setActiveIndex] = useState(-1);
   const { items: recentItems, addSearch, clearAll } = useRecentSearches();
 
+  const [popularOptions, setPopularOptions] = useState<SuggestionOption[]>([]);
+  const [suggestionGroups, setSuggestionGroups] = useState<SuggestionGroup[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+
   const debouncedQuery = useDebouncedValue(query, 200);
   const trimmedQuery = query.trim();
+  const showSuggestions = trimmedQuery.length > 0;
+
+  // 인기 검색어는 검색어 입력과 무관하게 한 번만 조회한다.
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch("/api/trending-keywords?limit=6", { signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+      .then((data: { keywords: TrendingKeyword[] }) => {
+        setPopularOptions(data.keywords.map(toPopularOption));
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setPopularOptions([]);
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  // 자동완성은 debounce된 검색어가 바뀔 때마다 다시 조회한다. 검색어가
+  // 비어 있으면 아무 것도 하지 않는다 — `showSuggestions`가 false가 되어
+  // 어차피 `suggestionGroups`는 렌더링에 쓰이지 않는다.
+  useEffect(() => {
+    const trimmed = debouncedQuery.trim();
+    if (!trimmed) return;
+
+    const controller = new AbortController();
+
+    // `setIsLoadingSuggestions(true)`를 effect 본문에서 곧바로 호출하지 않도록
+    // (react-hooks/set-state-in-effect) 매크로태스크로 한 틱 미룬다 —
+    // `debouncedQuery` 자체가 이미 실제 debounce를 담당하므로 지연은 없다.
+    const timer = setTimeout(() => {
+      setIsLoadingSuggestions(true);
+
+      fetch(`/api/search/suggestions?q=${encodeURIComponent(trimmed)}`, {
+        signal: controller.signal,
+      })
+        .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+        .then((data: { groups: SuggestionGroup[] }) => {
+          setSuggestionGroups(data.groups);
+          setIsLoadingSuggestions(false);
+        })
+        .catch(() => {
+          if (controller.signal.aborted) return;
+          setSuggestionGroups([]);
+          setIsLoadingSuggestions(false);
+        });
+    }, 0);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [debouncedQuery]);
 
   const recentOptions: SuggestionOption[] = useMemo(
     () =>
@@ -47,26 +115,6 @@ export function useSearchCombobox({ initialValue = "", onSearch }: UseSearchComb
       })),
     [recentItems],
   );
-
-  const popularOptions: SuggestionOption[] = useMemo(
-    () =>
-      getPopularSearchKeywords(6).map((keyword) => ({
-        id: `option-popular-${keyword.id}`,
-        type: "popular" as const,
-        label: keyword.keyword,
-        href: `/search?q=${encodeURIComponent(keyword.keyword)}`,
-        rank: keyword.rank,
-        change: keyword.change,
-      })),
-    [],
-  );
-
-  const suggestionGroups: SuggestionGroup[] = useMemo(
-    () => getAutocompleteSuggestions(debouncedQuery),
-    [debouncedQuery],
-  );
-
-  const showSuggestions = trimmedQuery.length > 0;
 
   const flattenedOptions: SuggestionOption[] = useMemo(() => {
     if (showSuggestions) return suggestionGroups.flatMap((group) => group.options);
@@ -179,6 +227,7 @@ export function useSearchCombobox({ initialValue = "", onSearch }: UseSearchComb
     recentOptions,
     popularOptions,
     suggestionGroups,
+    isLoadingSuggestions,
     showSuggestions,
     flattenedOptions,
     clearRecent: clearAll,
