@@ -17,12 +17,42 @@ const SOURCES: NewsSource[] = [
 ];
 
 const AUTHORS: Author[] = [
-  { id: "author-kdy", name: "김도윤", role: "기자" },
-  { id: "author-lsj", name: "이서준", role: "기자" },
-  { id: "author-pha", name: "박하은", role: "기자" },
-  { id: "author-cjw", name: "최지우", role: "기자" },
-  { id: "author-jmj", name: "정민재", role: "기자" },
-  { id: "author-hsy", name: "한소율", role: "기자" },
+  {
+    id: "author-kdy",
+    name: "김도윤",
+    role: "기자",
+    bio: "정치·경제 현안을 두루 취재하며 현장 중심의 기사를 씁니다.",
+  },
+  {
+    id: "author-lsj",
+    name: "이서준",
+    role: "기자",
+    bio: "산업·과학 분야를 담당하며 데이터에 기반한 분석 기사를 씁니다.",
+  },
+  {
+    id: "author-pha",
+    name: "박하은",
+    role: "기자",
+    bio: "사회·생활 이슈를 취재하며 독자의 눈높이에 맞춘 기사를 씁니다.",
+  },
+  {
+    id: "author-cjw",
+    name: "최지우",
+    role: "기자",
+    bio: "국제·문화 소식을 전하며 균형 잡힌 시각을 지향합니다.",
+  },
+  {
+    id: "author-jmj",
+    name: "정민재",
+    role: "기자",
+    bio: "사회부에서 정책과 제도 이슈를 심층 취재합니다.",
+  },
+  {
+    id: "author-hsy",
+    name: "한소율",
+    role: "기자",
+    bio: "스포츠·엔터테인먼트 현장을 발로 뛰며 취재합니다.",
+  },
 ];
 
 const PLACEHOLDER_COUNT = 6;
@@ -670,6 +700,18 @@ export const MOCK_NEWS: NewsArticle[] = ARTICLE_SPECS.map((spec, index) => ({
   tags: spec.tags,
 }));
 
+// AUTHORS 배열의 각 항목은 위 MOCK_NEWS 매핑에서 `resolveAuthor(...)`를 통해
+// 참조(reference)로 공유된다 — 여기서 articleCount를 채워 넣으면 이미 만들어진
+// 모든 article.author에도 동일하게 반영된다 (TASK-009, Author Card용 mock 통계).
+for (const author of AUTHORS) {
+  author.articleCount = MOCK_NEWS.filter(
+    (article) => article.author?.id === author.id,
+  ).length;
+}
+
+/** 작성자 목록 (TASK-009 Author Card 등에서 참조용으로 사용) */
+export { AUTHORS };
+
 export function getArticlesByCategory(slug: string): NewsArticle[] {
   return MOCK_NEWS.filter((article) => article.category.slug === slug);
 }
@@ -685,3 +727,42 @@ export const BREAKING_ARTICLES: NewsArticle[] = MOCK_NEWS.filter(
 export const FEATURED_ARTICLES: NewsArticle[] = MOCK_NEWS.filter(
   (article) => article.isFeatured,
 );
+
+function byPublishedAtDesc(a: NewsArticle, b: NewsArticle): number {
+  return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+}
+
+/** 최신순 기사 목록 (TASK-009 카테고리/상세 페이지 공용) */
+export function getLatestArticles(limit?: number, articles: NewsArticle[] = MOCK_NEWS): NewsArticle[] {
+  const sorted = [...articles].sort(byPublishedAtDesc);
+  return typeof limit === "number" ? sorted.slice(0, limit) : sorted;
+}
+
+/** 조회수순 인기 기사 목록 (TASK-009 카테고리 페이지 인기 뉴스) */
+export function getPopularArticles(limit?: number, articles: NewsArticle[] = MOCK_NEWS): NewsArticle[] {
+  const sorted = [...articles].sort((a, b) => b.viewCount - a.viewCount);
+  return typeof limit === "number" ? sorted.slice(0, limit) : sorted;
+}
+
+/**
+ * 관련 기사 (TASK-009 뉴스 상세 페이지). 같은 카테고리의 최신 기사를
+ * 우선하고, 부족하면 전체 최신 기사로 채운다. 기준 기사 자신은 제외한다.
+ */
+export function getRelatedArticles(article: NewsArticle, limit = 4): NewsArticle[] {
+  const sameCategory = getLatestArticles(
+    undefined,
+    MOCK_NEWS.filter((item) => item.id !== article.id && item.category.slug === article.category.slug),
+  );
+
+  if (sameCategory.length >= limit) {
+    return sameCategory.slice(0, limit);
+  }
+
+  const usedIds = new Set([article.id, ...sameCategory.map((item) => item.id)]);
+  const fallback = getLatestArticles(
+    undefined,
+    MOCK_NEWS.filter((item) => !usedIds.has(item.id)),
+  );
+
+  return [...sameCategory, ...fallback].slice(0, limit);
+}

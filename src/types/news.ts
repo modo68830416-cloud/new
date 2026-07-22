@@ -20,6 +20,13 @@ export interface Author {
   name: string;
   role?: string;
   profileImage?: string;
+  /**
+   * TASK-009에서 추가한 선택 필드 (기존 소비처를 깨뜨리지 않는다).
+   * Author Card에 표시할 짧은 소개글.
+   */
+  bio?: string;
+  /** 작성자 카드에 표시하는 Mock 누적 기사 수 */
+  articleCount?: number;
 }
 
 export type MediaAssetType = "image" | "video";
@@ -70,7 +77,72 @@ export interface NewsArticle {
   isPremium?: boolean;
   /** 영상 기사 재생 길이 표시용 (예: "03:24"). VideoNewsCard에서 사용 */
   duration?: string;
+
+  /**
+   * TASK-009에서 추가한 선택 필드. 뉴스 상세 페이지(`/news/[slug]`) 전용이며
+   * 값이 없어도(undefined) 카드/리스트/그리드(TASK-007) 렌더링에는 아무
+   * 영향이 없다 — 실제 CMS 연동 없이 mock 데이터로만 채운다.
+   */
+  /** 목차·읽기 진행률의 기준이 되는 기사 본문 (H2/H3/문단/목록/인용/이미지) */
+  body?: ArticleContentBlock[];
 }
+
+/**
+ * 기사 본문 콘텐츠 블록 (TASK-009).
+ *
+ * 실제 CMS/리치 텍스트 연동 없이 mock 데이터로만 구성되는 구조화된 본문
+ * 표현이다. `heading`은 목차(TOC) 생성의 기준이 되므로 `id`(앵커),
+ * `level`(2|3), `text`를 갖는다.
+ */
+export type ArticleContentBlockType =
+  | "heading"
+  | "paragraph"
+  | "list"
+  | "quote"
+  | "image";
+
+export interface ArticleHeadingBlock {
+  id: string;
+  type: "heading";
+  level: 2 | 3;
+  text: string;
+}
+
+export interface ArticleParagraphBlock {
+  id: string;
+  type: "paragraph";
+  text: string;
+}
+
+export interface ArticleListBlock {
+  id: string;
+  type: "list";
+  style: "ordered" | "unordered";
+  items: string[];
+}
+
+export interface ArticleQuoteBlock {
+  id: string;
+  type: "quote";
+  text: string;
+  attribution?: string;
+}
+
+/** CMS 연동 전이므로 실제 이미지가 없을 수 있다 — 없으면 fallback placeholder로 표시한다 */
+export interface ArticleImageBlock {
+  id: string;
+  type: "image";
+  src?: string;
+  alt: string;
+  caption?: string;
+}
+
+export type ArticleContentBlock =
+  | ArticleHeadingBlock
+  | ArticleParagraphBlock
+  | ArticleListBlock
+  | ArticleQuoteBlock
+  | ArticleImageBlock;
 
 /**
  * 기사 유형 (TASK-007).
