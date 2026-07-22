@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { Menu, Moon, Search, X } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
@@ -33,6 +34,7 @@ const HIDE_THRESHOLD = 96;
  * - `prefers-reduced-motion`에서는 숨김 애니메이션을 하지 않는다.
  */
 export function Header({ className }: HeaderProps) {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -119,26 +121,40 @@ export function Header({ className }: HeaderProps) {
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <LiveBadge className="hidden md:inline-flex" />
 
-            {searchOpen ? (
-              <SearchInput
-                autoFocus
-                size="sm"
-                containerClassName="w-36 xs:w-48 sm:w-56"
-                placeholder="검색어를 입력하세요 (준비 중)"
-                aria-label="뉴스 검색 (준비 중)"
-                onBlur={() => setSearchOpen(false)}
-                onKeyDown={(event) => {
-                  if (event.key === "Escape") setSearchOpen(false);
-                }}
-              />
-            ) : (
-              <IconButton
-                label="검색 열기"
-                icon={<Search size={18} aria-hidden />}
-                variant="ghost"
-                onClick={() => setSearchOpen(true)}
-              />
-            )}
+            <div role="search" className="contents">
+              {searchOpen ? (
+                <SearchInput
+                  autoFocus
+                  size="sm"
+                  containerClassName="w-36 xs:w-48 sm:w-56"
+                  placeholder="검색어를 입력하세요"
+                  aria-label="뉴스 검색"
+                  onBlur={() => setSearchOpen(false)}
+                  onKeyDown={(event) => {
+                    // SearchInput 내부 handleKeyDown(Enter→onSearch)보다 이 prop이
+                    // 우선 적용되므로(props 전개가 마지막), Enter/Escape를 여기서
+                    // 함께 처리한다.
+                    if (event.key === "Escape") {
+                      setSearchOpen(false);
+                      return;
+                    }
+                    if (event.key === "Enter") {
+                      const trimmed = event.currentTarget.value.trim();
+                      if (!trimmed) return;
+                      setSearchOpen(false);
+                      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+                    }
+                  }}
+                />
+              ) : (
+                <IconButton
+                  label="검색 열기"
+                  icon={<Search size={18} aria-hidden />}
+                  variant="ghost"
+                  onClick={() => setSearchOpen(true)}
+                />
+              )}
+            </div>
 
             <IconButton
               label="다크모드 전환 (준비 중)"
