@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import Link from "next/link";
 import { Flame } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { LiveBadge } from "@/components/ui/live-badge";
@@ -18,6 +18,10 @@ import type { TrendingPanelProps } from "./TrendingPanel.types";
  * 이 컴포넌트가 미리보기 페이지 등에서 같은 페이지에 여러 번 렌더링될 수
  * 있으므로 heading에는 고정 id를 부여하지 않는다 (중복 id 방지). 랜드마크
  * 역할은 상위(`HeroSection`)의 `<section aria-label>`이 담당한다.
+ *
+ * 각 키워드 행은 `/search?q=`로 연결된다 — 자동완성의 추천 검색어
+ * (`mock-search.ts`의 `getAutocompleteSuggestions`)와 동일한 링크 형태다.
+ * TASK-006에서 만들어진 뒤로 링크 없이 방치돼 있던 것을 뒤늦게 연결한다.
  */
 export function TrendingPanel({ keywords, className }: TrendingPanelProps) {
   const items = (keywords ?? MOCK_TRENDING_KEYWORDS)
@@ -38,7 +42,7 @@ export function TrendingPanel({ keywords, className }: TrendingPanelProps) {
 
         <Stagger
           className="flex flex-col divide-y divide-border-subtle"
-          itemClassName="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
+          itemClassName="py-2.5 first:pt-0 last:pb-0"
         >
           {items.map((keyword) => {
             const delta =
@@ -47,7 +51,11 @@ export function TrendingPanel({ keywords, className }: TrendingPanelProps) {
                 : undefined;
 
             return (
-              <Fragment key={keyword.id}>
+              <Link
+                key={keyword.id}
+                href={`/search?q=${encodeURIComponent(keyword.keyword)}`}
+                className="flex items-center justify-between gap-3 rounded-sm outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:text-accent-primary focus-visible:ring-2 focus-visible:ring-[var(--color-border-focus)]"
+              >
                 <div className="flex min-w-0 items-center gap-3">
                   <span className="type-data-number w-5 shrink-0 text-text-muted">
                     {keyword.rank}
@@ -57,7 +65,7 @@ export function TrendingPanel({ keywords, className }: TrendingPanelProps) {
                   </span>
                 </div>
                 <TrendingIndicator change={keyword.change} delta={delta} className="shrink-0" />
-              </Fragment>
+              </Link>
             );
           })}
         </Stagger>

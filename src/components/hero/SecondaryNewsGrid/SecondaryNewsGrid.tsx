@@ -5,6 +5,7 @@ import { NewsMeta } from "@/components/ui/news-meta";
 import { SlideUp } from "@/components/motion/SlideUp";
 import { transitionHover } from "@/animations/transitions";
 import { getSecondaryHeroArticles } from "@/lib/hero-articles";
+import { NewsCardLink, newsCardContainerClassName } from "@/components/news";
 import { cn } from "@/lib/utils";
 import type { SecondaryNewsGridProps } from "./SecondaryNewsGrid.types";
 
@@ -26,6 +27,11 @@ const SIZE_CLASSES = [
  *
  * Card Stagger(순차 등장) + Image Zoom(hover) + Hover Lift 모션을 사용하고,
  * 카드마다 열 폭을 다르게 배치해 시각적 리듬을 만든다.
+ *
+ * 카드 전체 클릭 영역은 다른 뉴스 카드(TASK-007 `NewsCardLink`)와 동일한
+ * stretched link 패턴을 사용한다 — TASK-006에서는 상세 페이지가 없어 링크
+ * 없이 만들어졌다가, TASK-009에서 `/news/[slug]`가 생긴 뒤에도 놓쳐 있던
+ * 것을 뒤늦게 연결한다.
  */
 export function SecondaryNewsGrid({ articles, className }: SecondaryNewsGridProps) {
   const items = articles ?? getSecondaryHeroArticles(6);
@@ -39,7 +45,11 @@ export function SecondaryNewsGrid({ articles, className }: SecondaryNewsGridProp
           key={article.id}
           delay={index * 0.06}
           whileHover={{ y: -4, transition: transitionHover }}
-          className={cn("h-full", SIZE_CLASSES[index % SIZE_CLASSES.length])}
+          className={cn(
+            newsCardContainerClassName,
+            "h-full",
+            SIZE_CLASSES[index % SIZE_CLASSES.length],
+          )}
         >
           <Card
             padding="none"
@@ -58,7 +68,7 @@ export function SecondaryNewsGrid({ articles, className }: SecondaryNewsGridProp
             <div className="flex flex-1 flex-col gap-2 p-4">
               <CategoryBadge category={article.category} size="sm" />
               <h3 className="type-card-title line-clamp-2 text-text-primary">
-                {article.title}
+                <NewsCardLink href={`/news/${article.slug}`}>{article.title}</NewsCardLink>
               </h3>
               <NewsMeta
                 publishedAt={article.publishedAt}
