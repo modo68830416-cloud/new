@@ -1,6 +1,7 @@
 import { CategoryBadge } from "@/components/ui/category-badge";
 import { ViewCount } from "@/components/ui/view-count";
 import { TrendingIndicator } from "@/components/ui/trending-indicator";
+import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { NewsImage } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
@@ -71,6 +72,13 @@ export function RankedNewsCard({
         {change && (
           <TrendingIndicator change={change} delta={delta} className="shrink-0" />
         )}
+
+        <BookmarkButton
+          articleId={article.id}
+          slug={article.slug}
+          size="sm"
+          className="shrink-0"
+        />
       </div>
     </article>
   );

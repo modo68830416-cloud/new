@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { Menu, Moon, Search, X } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
 import { LiveBadge } from "@/components/ui/live-badge";
 import { SearchInput } from "@/components/ui/search-input";
 import { Navigation } from "@/components/layout/Navigation";
 import { MobileNavigation } from "@/components/layout/MobileNavigation";
+import { ThemeToggle } from "@/components/personalization";
 import { siteConfig } from "@/config/site";
 import { transitionStandard } from "@/animations/transitions";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -29,8 +30,8 @@ const HIDE_THRESHOLD = 96;
  *
  * - Sticky + 스크롤 시 높이 축소 + Blur 배경 (Shadow 토큰 사용)
  * - 아래로 스크롤하면 숨고, 위로 스크롤하면 다시 나타난다 (Header Hide/Show)
- * - 로고 / 데스크톱 카테고리 메뉴 / 검색 버튼(UI만) / 다크모드 자리(기능 없음) /
- *   모바일 메뉴 버튼 / Live 표시
+ * - 로고 / 데스크톱 카테고리 메뉴 / 검색 버튼(UI만) / 다크모드·라이트모드
+ *   토글(TASK-011, `ThemeToggle`) / 모바일 메뉴 버튼 / Live 표시
  * - `prefers-reduced-motion`에서는 숨김 애니메이션을 하지 않는다.
  */
 export function Header({ className }: HeaderProps) {
@@ -156,14 +157,7 @@ export function Header({ className }: HeaderProps) {
               )}
             </div>
 
-            <IconButton
-              label="다크모드 전환 (준비 중)"
-              title="다크모드 전환 (준비 중)"
-              icon={<Moon size={18} aria-hidden />}
-              variant="ghost"
-              className="hidden opacity-70 sm:inline-flex"
-              aria-disabled="true"
-            />
+            <ThemeToggle variant="icon" className="hidden sm:inline-flex" />
           </div>
         </div>
       </motion.header>

@@ -1,4 +1,5 @@
 import { TimeAgo } from "@/components/ui/time-ago";
+import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { NewsImage } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
@@ -51,6 +52,12 @@ export function CompactNewsCard({
           </NewsTitle>
           <TimeAgo date={article.publishedAt} className="mt-1 block text-text-muted" />
         </div>
+        <BookmarkButton
+          articleId={article.id}
+          slug={article.slug}
+          size="sm"
+          className="shrink-0"
+        />
       </div>
     </article>
   );

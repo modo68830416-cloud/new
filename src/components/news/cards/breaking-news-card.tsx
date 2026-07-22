@@ -4,6 +4,7 @@ import { BreakingBadge } from "@/components/ui/breaking-badge";
 import { LiveBadge } from "@/components/ui/live-badge";
 import { Badge } from "@/components/ui/badge";
 import { TimeAgo } from "@/components/ui/time-ago";
+import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { designSystemConfig } from "@/config/design-system";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
@@ -63,6 +64,12 @@ export function BreakingNewsCard({
               {topicLabel}
             </Badge>
           )}
+          <BookmarkButton
+            articleId={article.id}
+            slug={article.slug}
+            size="sm"
+            className="ml-auto"
+          />
         </div>
 
         <NewsTitle level={titleLevel} size="md" lineClamp={2}>

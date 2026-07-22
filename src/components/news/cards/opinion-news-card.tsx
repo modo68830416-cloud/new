@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { CategoryBadge } from "@/components/ui/category-badge";
 import { TimeAgo } from "@/components/ui/time-ago";
+import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsSummary } from "../primitives/news-summary";
 import { NewsSourceLine } from "../primitives/news-source";
@@ -30,7 +31,15 @@ export function OpinionNewsCard({
   return (
     <article className={cn(newsCardContainerClassName, "h-full", className)}>
       <Card padding="md" interactive className="group flex h-full flex-col gap-3">
-        <CategoryBadge category={article.category} size="sm" className="w-fit" />
+        <div className="flex items-center gap-2">
+          <CategoryBadge category={article.category} size="sm" className="w-fit" />
+          <BookmarkButton
+            articleId={article.id}
+            slug={article.slug}
+            size="sm"
+            className="ml-auto"
+          />
+        </div>
 
         <NewsTitle level={titleLevel} size="md" lineClamp={3}>
           <NewsCardLink href={`/news/${article.slug}`}>{article.title}</NewsCardLink>

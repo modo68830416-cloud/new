@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { LayoutProvider } from "@/components/layout/LayoutProvider";
+import { ToastProvider } from "@/components/ui/toast";
 import { siteConfig } from "@/config/site";
+import { getThemeInitScript } from "@/lib/theme-script";
 import "@/styles/globals.css";
 
 const geistSans = Geist({
@@ -55,9 +57,18 @@ export default function RootLayout({
     <html
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <LayoutProvider>{children}</LayoutProvider>
+        {/* TASK-011 — hydration 이전에 테마/글자 크기를 적용해 깜빡임(FOUC)을
+            없애는 블로킹 스크립트. 반드시 body의 첫 자식이어야 한다. */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: getThemeInitScript() }}
+        />
+        <ToastProvider>
+          <LayoutProvider>{children}</LayoutProvider>
+        </ToastProvider>
       </body>
     </html>
   );

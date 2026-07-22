@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { CategoryBadge } from "@/components/ui/category-badge";
 import { Badge } from "@/components/ui/badge";
+import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { NewsImage } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsSummary } from "../primitives/news-summary";
@@ -67,6 +68,12 @@ export function StandardNewsCard({
                 프리미엄
               </Badge>
             )}
+            <BookmarkButton
+              articleId={article.id}
+              slug={article.slug}
+              size="sm"
+              className="ml-auto"
+            />
           </div>
 
           <NewsTitle level={titleLevel} size={TITLE_SIZE_BY_CARD_SIZE[size]} lineClamp={2}>

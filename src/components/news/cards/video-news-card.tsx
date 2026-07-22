@@ -2,6 +2,7 @@ import { Play } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CategoryBadge } from "@/components/ui/category-badge";
+import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { NewsImage } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsCardMeta } from "../primitives/news-meta";
@@ -62,7 +63,15 @@ export function VideoNewsCard({
           }
         />
         <div className="flex flex-1 flex-col gap-2 p-4">
-          <CategoryBadge category={article.category} size="sm" className="w-fit" />
+          <div className="flex items-center gap-2">
+            <CategoryBadge category={article.category} size="sm" className="w-fit" />
+            <BookmarkButton
+              articleId={article.id}
+              slug={article.slug}
+              size="sm"
+              className="ml-auto"
+            />
+          </div>
           <NewsTitle level={titleLevel} size="md" lineClamp={2}>
             <NewsCardLink href={`/news/${article.slug}`}>{article.title}</NewsCardLink>
           </NewsTitle>

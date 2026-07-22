@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { getArticleBySlug, getRelatedArticles, MOCK_NEWS } from "@/data/mock-news";
 import { buildArticleBody, extractHeadings } from "@/data/mock-article-body";
@@ -14,6 +15,7 @@ import {
   ShareButtons,
   TableOfContents,
 } from "@/components/article";
+import { BookmarkButton, ReadingHistoryTracker } from "@/components/personalization";
 
 const ARTICLE_CONTENT_ID = "article-content";
 
@@ -66,6 +68,9 @@ export default async function NewsDetailPage({
   return (
     <div className="flex flex-1 flex-col">
       <ReadProgressBar targetId={ARTICLE_CONTENT_ID} />
+      {/* 상세 페이지 진입을 자동으로 읽기 기록에 남긴다 (TASK-011) —
+          화면에는 아무것도 렌더링하지 않는다. */}
+      <ReadingHistoryTracker articleId={article.id} slug={article.slug} />
 
       <div className="container-dashboard grid grid-cols-1 gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:py-12">
         <article id={ARTICLE_CONTENT_ID} className="min-w-0">
@@ -86,7 +91,10 @@ export default async function NewsDetailPage({
               )}
 
               <ArticleMeta article={article} />
-              <ShareButtons title={article.title} url={shareUrl} />
+              <div className="flex flex-wrap items-center gap-2">
+                <ShareButtons title={article.title} url={shareUrl} />
+                <BookmarkButton articleId={article.id} slug={article.slug} showLabel />
+              </div>
             </header>
 
             <figure className="flex flex-col gap-2">
@@ -96,7 +104,23 @@ export default async function NewsDetailPage({
               )}
             </figure>
 
-            <ArticleBody blocks={body} />
+            {/* 설정 페이지의 글자 크기 환경설정(TASK-011)이 본문에만 적용되도록
+                이 컨테이너 안에서만 --text-* 토큰을 --font-scale-reading 배율만큼
+                다시 선언한다. 다른 화면의 타이포그래피 토큰 값 자체는 바뀌지
+                않는다. */}
+            <div
+              style={
+                {
+                  "--text-base": "calc(1rem * var(--font-scale-reading, 1))",
+                  "--text-lg": "calc(1.125rem * var(--font-scale-reading, 1))",
+                  "--text-xl": "calc(1.25rem * var(--font-scale-reading, 1))",
+                  "--text-2xl": "calc(1.5rem * var(--font-scale-reading, 1))",
+                  "--text-3xl": "calc(1.875rem * var(--font-scale-reading, 1))",
+                } as CSSProperties
+              }
+            >
+              <ArticleBody blocks={body} />
+            </div>
 
             {article.author && (
               <div className="border-t border-border-subtle pt-6">

@@ -4,6 +4,7 @@ import { CategoryBadge } from "@/components/ui/category-badge";
 import { BreakingBadge } from "@/components/ui/breaking-badge";
 import { LiveBadge } from "@/components/ui/live-badge";
 import { LinkButton } from "@/components/ui/link-button";
+import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { NewsImage } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsSummary } from "../primitives/news-summary";
@@ -62,6 +63,12 @@ export function FeaturedNewsCard({
                 단독
               </span>
             )}
+            <BookmarkButton
+              articleId={article.id}
+              slug={article.slug}
+              size="sm"
+              className="ml-auto"
+            />
           </div>
 
           <NewsTitle level={titleLevel} size="xl" lineClamp={3}>
