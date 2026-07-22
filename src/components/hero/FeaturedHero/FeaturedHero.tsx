@@ -9,6 +9,7 @@ import { ViewCount } from "@/components/ui/view-count";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { getFeaturedHeroArticle } from "@/lib/hero-articles";
 import { siteConfig } from "@/config/site";
+import { NewsCardLink } from "@/components/news";
 import { cn } from "@/lib/utils";
 import { FeaturedHeroShareButton } from "./FeaturedHeroShareButton";
 import type { FeaturedHeroProps } from "./FeaturedHero.types";
@@ -21,7 +22,11 @@ import type { FeaturedHeroProps } from "./FeaturedHero.types";
  *
  * "기사 읽기"/공유 버튼은 TASK-006에서는 상세 페이지가 없어 UI만 제공하는
  * placeholder였지만, TASK-009에서 `/news/[slug]` 상세 페이지가 생기고
- * TASK-014에서 실제로 연결했다.
+ * TASK-014에서 실제로 연결했다. 제목 자체도 다른 뉴스 카드(TASK-007
+ * `NewsCardLink`)와 동일한 stretched link 패턴으로 카드 전체를 클릭 영역으로
+ * 만든다 — 버튼만 연결하고 제목 텍스트는 그대로 방치돼 있던 것을 뒤늦게
+ * 고쳤다. `Surface`가 이미 `position: relative`를 갖고 있어 stretched link가
+ * 카드 전체(이미지 포함)에 걸린다.
  */
 export function FeaturedHero({ article, className }: FeaturedHeroProps) {
   const featured = article ?? getFeaturedHeroArticle();
@@ -34,7 +39,7 @@ export function FeaturedHero({ article, className }: FeaturedHeroProps) {
         radius="xl"
         shadow="lg"
         bordered
-        className="group relative flex h-full min-h-[26rem] flex-col justify-end overflow-hidden sm:min-h-[30rem] lg:min-h-[36rem]"
+        className="group relative flex h-full min-h-[26rem] flex-col justify-end overflow-hidden focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--color-border-focus)] sm:min-h-[30rem] lg:min-h-[36rem]"
       >
         <Image
           src={image.url}
@@ -61,7 +66,7 @@ export function FeaturedHero({ article, className }: FeaturedHeroProps) {
           </div>
 
           <h2 className="type-hero-title line-clamp-3 break-keep text-text-primary">
-            {featured.title}
+            <NewsCardLink href={`/news/${featured.slug}`}>{featured.title}</NewsCardLink>
           </h2>
 
           <p className="type-body line-clamp-2 max-w-2xl text-text-secondary sm:line-clamp-3">
@@ -78,7 +83,7 @@ export function FeaturedHero({ article, className }: FeaturedHeroProps) {
             <ViewCount count={featured.viewCount} className="text-text-secondary" />
           </div>
 
-          <div className="mt-2 flex items-center gap-3">
+          <div className="relative z-sticky mt-2 flex items-center gap-3">
             <LinkButton
               href={`/news/${featured.slug}`}
               variant="primary"
