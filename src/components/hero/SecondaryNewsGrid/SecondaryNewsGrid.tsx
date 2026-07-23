@@ -63,6 +63,7 @@ export function SecondaryNewsGrid({ articles, className }: SecondaryNewsGridProp
                 src={article.thumbnail.url}
                 alt={article.thumbnail.alt}
                 fill
+                unoptimized={article.thumbnail.url.startsWith("http")}
                 sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                 className="object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-110"
               />

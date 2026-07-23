@@ -65,7 +65,7 @@ function sourceNameFromUrl(url: string): string {
   }
 }
 
-function thumbnailFor(categorySlug: string, alt: string) {
+function placeholderThumbnail(categorySlug: string, alt: string) {
   return {
     id: `naver-thumb-${categorySlug}`,
     type: "image" as const,
@@ -74,6 +74,59 @@ function thumbnailFor(categorySlug: string, alt: string) {
     width: 800,
     height: 450,
   };
+}
+
+const OG_IMAGE_PATTERN =
+  /<meta[^>]+(?:property|name)=["'](?:og:image(?::secure_url)?|twitter:image)["'][^>]+content=["']([^"']+)["']/i;
+
+/**
+ * 원문 기사 페이지에서 Open Graph 이미지를 추출한다.
+ *
+ * 네이버 뉴스 검색 API 자체는 썸네일 URL을 제공하지 않아서(제목·요약·링크만
+ * 옴), 카드 미리보기에 실제 기사 사진이 뜨게 하려면 원문 HTML의
+ * `og:image`를 직접 가져와야 한다. 느리거나 차단하는 사이트 때문에 홈페이지
+ * 전체가 지연되지 않도록 짧은 타임아웃을 두고, 실패하면 조용히 undefined를
+ * 반환해 카테고리 그라데이션 placeholder로 자연스럽게 폴백한다.
+ */
+async function fetchOgImage(pageUrl: string): Promise<string | undefined> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
+
+  try {
+    const response = await fetch(pageUrl, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      },
+      next: { revalidate: 300 },
+    });
+
+    if (!response.ok) return undefined;
+
+    // og:image는 보통 <head> 안에 있으므로 전체를 다 받지 않고 앞부분만 읽는다.
+    const reader = response.body?.getReader();
+    if (!reader) return undefined;
+
+    const decoder = new TextDecoder();
+    let html = "";
+    while (html.length < 60_000) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      html += decoder.decode(value, { stream: true });
+      const match = html.match(OG_IMAGE_PATTERN);
+      if (match) {
+        reader.cancel().catch(() => {});
+        return new URL(match[1], pageUrl).toString();
+      }
+    }
+    reader.cancel().catch(() => {});
+    return undefined;
+  } catch {
+    return undefined;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function toNewsArticle(item: NaverNewsItem, category: NewsCategory, index: number): NewsArticle {
@@ -89,13 +142,24 @@ function toNewsArticle(item: NaverNewsItem, category: NewsCategory, index: numbe
     category,
     source: { id: `src-${sourceNameFromUrl(externalUrl)}`, name: sourceNameFromUrl(externalUrl) },
     publishedAt: new Date(item.pubDate).toISOString(),
-    thumbnail: thumbnailFor(category.slug, title),
+    thumbnail: placeholderThumbnail(category.slug, title),
     isBreaking: false,
     isFeatured: false,
     viewCount: 0,
     commentCount: 0,
     tags: [],
     externalUrl,
+  };
+}
+
+/** 가능하면 원문 og:image로, 실패하면 카테고리 placeholder를 그대로 둔다 */
+async function withOgImage(article: NewsArticle): Promise<NewsArticle> {
+  const ogImageUrl = await fetchOgImage(article.externalUrl!);
+  if (!ogImageUrl) return article;
+
+  return {
+    ...article,
+    thumbnail: { ...article.thumbnail, url: ogImageUrl },
   };
 }
 
@@ -138,7 +202,8 @@ export async function fetchNaverFeaturedArticle(): Promise<NewsArticle> {
     throw new NewsApiError("네이버 뉴스 검색 결과가 없습니다.");
   }
 
-  return { ...toNewsArticle(item, category, 0), isFeatured: true, isBreaking: true };
+  const article = await withOgImage(toNewsArticle(item, category, 0));
+  return { ...article, isFeatured: true, isBreaking: true };
 }
 
 /** 홈페이지 Secondary Grid용 카테고리별 최신 기사 목록 */
@@ -154,7 +219,7 @@ export async function fetchNaverSecondaryArticles(limit = 6): Promise<NewsArticl
       const [item] = items;
       if (!item) return null;
 
-      return toNewsArticle(item, category, index);
+      return withOgImage(toNewsArticle(item, category, index));
     }),
   );
 

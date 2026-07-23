@@ -46,6 +46,7 @@ export function FeaturedHero({ article, className }: FeaturedHeroProps) {
           src={image.url}
           alt={image.alt}
           fill
+          unoptimized={image.url.startsWith("http")}
           priority
           sizes="(min-width: 1024px) 66vw, 100vw"
           className="object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-105"
