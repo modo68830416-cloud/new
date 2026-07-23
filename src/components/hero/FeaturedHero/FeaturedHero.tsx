@@ -53,7 +53,7 @@ export function FeaturedHero({ article, className }: FeaturedHeroProps) {
         />
         <div
           aria-hidden
-          className="bg-gradient-image-readability pointer-events-none absolute inset-0"
+          className="bg-gradient-hero-overlay pointer-events-none absolute inset-0"
         />
 
         <div className="relative z-content flex flex-col gap-4 p-6 sm:p-8 lg:p-10">
