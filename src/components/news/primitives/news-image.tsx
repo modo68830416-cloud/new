@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { ImageOff } from "lucide-react";
 import { Surface } from "@/components/ui/surface";
@@ -64,6 +67,9 @@ export function NewsImage({
   imgClassName,
   overlayContent,
 }: NewsImageProps) {
+  const [loadFailed, setLoadFailed] = useState(false);
+  const showImage = Boolean(src) && !loadFailed;
+
   return (
     <div
       className={cn(
@@ -72,17 +78,18 @@ export function NewsImage({
         className,
       )}
     >
-      {src ? (
+      {showImage ? (
         <Image
-          src={src}
+          src={src as string}
           alt={alt}
           fill
-          unoptimized={src.startsWith("http")}
+          unoptimized={(src as string).startsWith("http")}
           priority={priority}
           loading={priority ? undefined : "lazy"}
           sizes={sizes}
           placeholder={blurDataURL ? "blur" : undefined}
           blurDataURL={blurDataURL}
+          onError={() => setLoadFailed(true)}
           className={cn(
             "object-cover",
             enableZoom &&
@@ -107,7 +114,7 @@ export function NewsImage({
           />
         </Surface>
       )}
-      {overlay !== "none" && src && (
+      {overlay !== "none" && showImage && (
         <div
           aria-hidden
           className={cn("pointer-events-none absolute inset-0", OVERLAY_CLASSES[overlay])}

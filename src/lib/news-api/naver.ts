@@ -69,11 +69,23 @@ const HTML_ENTITIES: Record<string, string> = {
   "&gt;": ">",
 };
 
+/**
+ * 일부 언론사 사이트는 og:image URL의 `&`를 `&amp;amp;`처럼 이중으로
+ * 이스케이프해서 내려준다. 정규식 치환은 원본 문자열을 한 번만 훑기 때문에
+ * 한 번 디코딩해서는 `&amp;`가 남는다 — 더 이상 바뀌지 않을 때까지 반복한다.
+ */
+function decodeHtmlEntities(raw: string): string {
+  let decoded = raw;
+  for (let i = 0; i < 3; i += 1) {
+    const next = decoded.replace(/&quot;|&apos;|&amp;|&lt;|&gt;/g, (entity) => HTML_ENTITIES[entity] ?? entity);
+    if (next === decoded) break;
+    decoded = next;
+  }
+  return decoded;
+}
+
 function cleanText(raw: string): string {
-  return raw
-    .replace(/<\/?b>/g, "")
-    .replace(/&quot;|&apos;|&amp;|&lt;|&gt;/g, (entity) => HTML_ENTITIES[entity] ?? entity)
-    .trim();
+  return decodeHtmlEntities(raw.replace(/<\/?b>/g, "")).trim();
 }
 
 function sourceNameFromUrl(url: string): string {
@@ -133,7 +145,10 @@ function extractOgImage(html: string): string | undefined {
   for (const tag of metaTags) {
     if (!OG_IMAGE_NAME_PATTERN.test(tag)) continue;
     const contentMatch = tag.match(CONTENT_ATTR_PATTERN);
-    if (contentMatch && !isGenericSiteImage(contentMatch[1])) return contentMatch[1];
+    if (contentMatch) {
+      const imageUrl = decodeHtmlEntities(contentMatch[1]);
+      if (!isGenericSiteImage(imageUrl)) return imageUrl;
+    }
   }
   return undefined;
 }
