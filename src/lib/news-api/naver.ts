@@ -270,11 +270,13 @@ function delay(ms: number): Promise<void> {
 }
 
 /**
- * 여러 카테고리 페이지가 ISR로 거의 동시에 재검증되면 네이버 API에
- * 순간적으로 요청이 몰려 429/5xx가 튈 때가 있다. 이 경우 그대로
- * mock으로 폴백하면 방금 전까지 실제 뉴스가 보이던 페이지가 다음 재검증
- * 주기에 아무 예고 없이 가짜 기사로 바뀌어 보인다 — 짧게 한 번 재시도해서
- * 이런 일시적 실패를 흡수한다.
+ * 네이버 뉴스 검색 API는 초당 10건으로 제한돼 있다. 모든 페이지 상단에
+ * 공통으로 뜨는 속보 티커(`BreakingTickerServer`)도 페이지마다 별도로
+ * 호출하기 때문에, 사용자가 카테고리 탭을 빠르게 넘나들면 순간적으로
+ * 429가 튈 수 있다. 이 경우 그대로 mock으로 폴백하면 방금 전까지 실제
+ * 뉴스가 보이던 페이지가 다음 재검증 주기에 아무 예고 없이 가짜 기사로
+ * 바뀌어 보인다 — 점점 길어지는 지연을 두고 최대 두 번 재시도해서 1초
+ * 단위로 리셋되는 요청 제한 창을 넘겨 흡수한다.
  */
 async function searchNaverNews(
   query: string,
@@ -295,8 +297,8 @@ async function searchNaverNews(
   };
 
   let lastStatus = 0;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    if (attempt > 0) await delay(400);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (attempt > 0) await delay(attempt * 500);
 
     const response = await fetch(url, {
       headers,
