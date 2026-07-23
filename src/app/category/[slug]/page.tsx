@@ -5,7 +5,7 @@ import {
   fetchLatestArticles,
   fetchPopularArticles,
 } from "@/lib/news-api";
-import { getCategoryBySlug, VISIBLE_CATEGORIES } from "@/constants/categories";
+import { getCategoryBySlug } from "@/constants/categories";
 import { CategoryHeader, PaginationPlaceholder } from "@/components/category";
 import {
   CategoryNewsGrid,
@@ -15,15 +15,13 @@ import {
 } from "@/components/news";
 import { siteConfig } from "@/config/site";
 
-export const dynamicParams = false;
-
 /**
- * mock 데이터(`VISIBLE_CATEGORIES`) 기준으로 카테고리 페이지를 정적 라우트로
- * 생성한다 (TASK-009) — `/category/politics`, `/category/economy` 등.
+ * 빌드 시점에 미리 생성해두면(SSG/ISR), 그 순간 네이버 API 연결이 잠깐이라도
+ * 불안정할 경우 mock 폴백 결과가 다음 재검증 주기까지 그대로 굳어버린다.
+ * 카테고리 페이지는 매 요청마다 새로 렌더링해 `/search`와 동일하게 항상
+ * 최신 조회 결과(및 재시도 로직)를 반영하도록 한다.
  */
-export function generateStaticParams() {
-  return VISIBLE_CATEGORIES.map((category) => ({ slug: category.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,

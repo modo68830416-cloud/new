@@ -2,6 +2,13 @@ import { HeroSection } from "@/components/hero/HeroSection";
 import { siteConfig } from "@/config/site";
 
 /**
+ * 빌드 시점에 정적으로 굳혀두면 그 순간 네이버 API 연결이 불안정할 때 mock
+ * 폴백 결과가 다음 재검증 주기까지 그대로 유지된다 — 매 요청마다 새로
+ * 렌더링해 항상 최신 조회 결과(및 재시도 로직)를 반영하도록 한다.
+ */
+export const dynamic = "force-dynamic";
+
+/**
  * 홈페이지 첫 화면(Above the Fold) — TASK-006.
  *
  * 페이지 전체를 대표하는 h1은 시각적으로는 숨기고(sr-only), Hero 내부의
