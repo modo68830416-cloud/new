@@ -153,22 +153,38 @@ function extractOgImage(html: string): string | undefined {
   return undefined;
 }
 
-const BODY_IMAGE_PATTERN = /<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/gi;
+const BODY_IMAGE_PATTERN = /<img\b[^>]*>/gi;
+const SRC_ATTR_PATTERN = /\bsrc\s*=\s*["']([^"']+)["']/i;
+const WIDTH_ATTR_PATTERN = /\bwidth\s*=\s*["']?(\d+)/i;
+const HEIGHT_ATTR_PATTERN = /\bheight\s*=\s*["']?(\d+)/i;
 const TINY_OR_ICON_IMAGE_PATTERN = /icon|sprite|pixel|blank\.(?:gif|png)|\.svg(?:[?#]|$)/i;
+const MIN_BODY_IMAGE_DIMENSION = 200;
 
 /**
  * `og:image`/`twitter:image`가 아예 없는 사이트를 위한 최후 폴백 —
  * `<body>` 안에서 처음 나오는 "실제 사진처럼 보이는" `<img>` 하나를
  * 고른다. data URI, 아이콘/스프라이트류, 로고 같은 사이트 공용 이미지는
  * 기사 사진이 아니므로 건너뛴다.
+ *
+ * `width`/`height` 속성이 둘 다 있고 충분히 큰 경우에만 채택한다 —
+ * 처음엔 이 검증 없이 첫 `<img>`를 그냥 썼더니, 관련기사 썸네일처럼
+ * 실제로는 작은 이미지를 카드 전체 크기로 늘려서 뿌옇게 깨진 채로 보이는
+ * 사고가 있었다. 크기를 알 수 없는 이미지는 차라리 카테고리
+ * placeholder(+ 제목 오버레이)로 두는 게 더 안전하므로 건너뛴다.
  */
 function extractFirstBodyImage(html: string): string | undefined {
   const bodyStart = html.search(/<body\b/i);
   const searchArea = bodyStart >= 0 ? html.slice(bodyStart) : html;
 
-  for (const match of searchArea.matchAll(BODY_IMAGE_PATTERN)) {
-    const raw = match[1];
+  for (const tag of searchArea.match(BODY_IMAGE_PATTERN) ?? []) {
+    const raw = tag.match(SRC_ATTR_PATTERN)?.[1];
     if (!raw || raw.startsWith("data:")) continue;
+
+    const width = Number(tag.match(WIDTH_ATTR_PATTERN)?.[1]);
+    const height = Number(tag.match(HEIGHT_ATTR_PATTERN)?.[1]);
+    if (!width || !height || width < MIN_BODY_IMAGE_DIMENSION || height < MIN_BODY_IMAGE_DIMENSION) {
+      continue;
+    }
 
     const imageUrl = decodeHtmlEntities(raw);
     if (isGenericSiteImage(imageUrl) || TINY_OR_ICON_IMAGE_PATTERN.test(imageUrl)) continue;
