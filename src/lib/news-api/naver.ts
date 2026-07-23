@@ -164,7 +164,7 @@ function extractOgImage(html: string): string | undefined {
  */
 async function fetchOgImage(pageUrl: string): Promise<string | undefined> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 4000);
+  const timeout = setTimeout(() => controller.abort(), 2500);
 
   try {
     const response = await fetch(pageUrl, {

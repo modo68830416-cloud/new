@@ -38,22 +38,39 @@ export function SearchResults({
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       <p className="type-body text-text-secondary" role="status" aria-live="polite">
-        {trimmed ? (
+        {isLoading ? (
           <>
-            <HighlightText
-              text={`"${trimmed}"`}
-              query={trimmed}
-              className="font-semibold text-text-primary"
-            />
-            에 대한 검색 결과{" "}
+            {trimmed ? (
+              <HighlightText
+                text={`"${trimmed}"`}
+                query={trimmed}
+                className="font-semibold text-text-primary"
+              />
+            ) : (
+              "전체 검색 결과"
+            )}
+            를 불러오는 중입니다…
           </>
         ) : (
-          "전체 검색 결과 "
+          <>
+            {trimmed ? (
+              <>
+                <HighlightText
+                  text={`"${trimmed}"`}
+                  query={trimmed}
+                  className="font-semibold text-text-primary"
+                />
+                에 대한 검색 결과{" "}
+              </>
+            ) : (
+              "전체 검색 결과 "
+            )}
+            <strong className="type-card-title text-text-primary">
+              {articles.length.toLocaleString()}
+            </strong>
+            건
+          </>
         )}
-        <strong className="type-card-title text-text-primary">
-          {articles.length.toLocaleString()}
-        </strong>
-        건
       </p>
 
       <NewsCardGrid
