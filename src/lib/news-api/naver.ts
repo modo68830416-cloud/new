@@ -296,26 +296,38 @@ async function searchNaverNews(
     "X-Naver-Client-Secret": clientSecret,
   };
 
-  let lastStatus = 0;
+  let lastError: unknown = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     if (attempt > 0) await delay(attempt * 500);
 
-    const response = await fetch(url, {
-      headers,
-      // 완전히 실시간은 아니지만 60초마다 새로 가져와 최신 상태를 유지한다.
-      next: { revalidate: 60 },
-    });
+    try {
+      const response = await fetch(url, {
+        headers,
+        // 완전히 실시간은 아니지만 60초마다 새로 가져와 최신 상태를 유지한다.
+        next: { revalidate: 60 },
+        // 기본 연결 타임아웃(10s)이 너무 길어서 재시도 3회를 다 채우면
+        // 30초 가까이 걸릴 수 있다 — 짧게 끊고 더 빨리 재시도한다.
+        signal: AbortSignal.timeout(4000),
+      });
 
-    if (response.ok) {
-      const data = (await response.json()) as NaverNewsResponse;
-      return data.items ?? [];
+      if (response.ok) {
+        const data = (await response.json()) as NaverNewsResponse;
+        return data.items ?? [];
+      }
+
+      lastError = new NewsApiError(`네이버 뉴스 API 호출에 실패했습니다. (${response.status})`);
+      if (response.status !== 429 && response.status < 500) break;
+    } catch (error) {
+      // 빌드 환경에서 openapi.naver.com 연결 자체가 간헐적으로 타임아웃되는
+      // 경우가 있다 — HTTP 응답조차 못 받고 fetch()가 던지는 네트워크
+      // 레벨 실패도 위의 429/5xx와 동일하게 재시도 대상으로 취급한다.
+      lastError = error;
     }
-
-    lastStatus = response.status;
-    if (response.status !== 429 && response.status < 500) break;
   }
 
-  throw new NewsApiError(`네이버 뉴스 API 호출에 실패했습니다. (${lastStatus})`);
+  throw lastError instanceof Error
+    ? lastError
+    : new NewsApiError("네이버 뉴스 API 호출에 실패했습니다.");
 }
 
 /** 홈페이지 Featured Hero용 대표 기사 1건 (최신 속보 키워드 기준) */
