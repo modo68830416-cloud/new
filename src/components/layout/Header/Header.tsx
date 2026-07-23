@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "motion/react";
 import { Menu, Search, X } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
 import { LiveBadge } from "@/components/ui/live-badge";
@@ -12,8 +11,6 @@ import { Navigation } from "@/components/layout/Navigation";
 import { MobileNavigation } from "@/components/layout/MobileNavigation";
 import { ThemeToggle } from "@/components/personalization";
 import { siteConfig } from "@/config/site";
-import { transitionStandard } from "@/animations/transitions";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { cn } from "@/lib/utils";
 
 export interface HeaderProps {
@@ -22,43 +19,26 @@ export interface HeaderProps {
 
 /** 이 값(px) 이상 스크롤되면 헤더가 축소되고 blur 배경이 강해진다 */
 const SHRINK_THRESHOLD = 12;
-/** 이 값(px)을 지나 아래로 스크롤할 때만 헤더를 숨긴다 (최상단 부근 튐 방지) */
-const HIDE_THRESHOLD = 96;
 
 /**
  * 전역 Global Header.
  *
  * - Sticky + 스크롤 시 높이 축소 + Blur 배경 (Shadow 토큰 사용)
- * - 아래로 스크롤하면 숨고, 위로 스크롤하면 다시 나타난다 (Header Hide/Show)
+ * - 스크롤 방향과 무관하게 항상 화면 상단에 고정된다
  * - 로고 / 데스크톱 카테고리 메뉴 / 검색 버튼(UI만) / 다크모드·라이트모드
  *   토글(TASK-011, `ThemeToggle`) / 모바일 메뉴 버튼 / Live 표시
- * - `prefers-reduced-motion`에서는 숨김 애니메이션을 하지 않는다.
  */
 export function Header({ className }: HeaderProps) {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
-  const [hidden, setHidden] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const lastScrollY = useRef(0);
-  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
-    lastScrollY.current = window.scrollY;
     let ticking = false;
 
     function update() {
-      const currentY = window.scrollY;
-      setScrolled(currentY > SHRINK_THRESHOLD);
-
-      if (prefersReducedMotion || mobileNavOpen || searchOpen) {
-        setHidden(false);
-      } else {
-        const goingDown = currentY > lastScrollY.current;
-        setHidden(goingDown && currentY > HIDE_THRESHOLD);
-      }
-
-      lastScrollY.current = currentY;
+      setScrolled(window.scrollY > SHRINK_THRESHOLD);
       ticking = false;
     }
 
@@ -72,23 +52,21 @@ export function Header({ className }: HeaderProps) {
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [prefersReducedMotion, mobileNavOpen, searchOpen]);
+  }, []);
 
   return (
     <>
-      <motion.header
+      <header
         className={cn(
           "sticky top-0 z-header w-full overflow-hidden border-b border-border-subtle",
           "transition-[background-color,box-shadow] duration-[var(--duration-normal)] ease-[var(--ease-standard)]",
           scrolled ? "glass-strong shadow-md" : "bg-background/85 shadow-none",
           className,
         )}
-        animate={{ y: hidden ? "-100%" : "0%" }}
-        transition={prefersReducedMotion ? { duration: 0 } : transitionStandard}
       >
         <div
           aria-hidden
-          className="bg-gradient-brand pointer-events-none absolute inset-0 opacity-[0.45] dark:opacity-[0.6]"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,#0284c7_0%,#2563eb_55%,#4338ca_100%)] opacity-[0.7] dark:opacity-[0.85]"
         />
 
         <div
@@ -165,7 +143,7 @@ export function Header({ className }: HeaderProps) {
             <ThemeToggle variant="icon" className="hidden sm:inline-flex" />
           </div>
         </div>
-      </motion.header>
+      </header>
 
       <MobileNavigation open={mobileNavOpen} onOpenChange={setMobileNavOpen} />
     </>
