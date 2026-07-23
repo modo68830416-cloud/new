@@ -78,7 +78,7 @@ export function Header({ className }: HeaderProps) {
     <>
       <motion.header
         className={cn(
-          "sticky top-0 z-header w-full border-b border-border-subtle",
+          "sticky top-0 z-header w-full overflow-hidden border-b border-border-subtle",
           "transition-[background-color,box-shadow] duration-[var(--duration-normal)] ease-[var(--ease-standard)]",
           scrolled ? "glass-strong shadow-md" : "bg-background/85 shadow-none",
           className,
@@ -87,8 +87,13 @@ export function Header({ className }: HeaderProps) {
         transition={prefersReducedMotion ? { duration: 0 } : transitionStandard}
       >
         <div
+          aria-hidden
+          className="bg-gradient-brand pointer-events-none absolute inset-0 opacity-[0.08] dark:opacity-[0.16]"
+        />
+
+        <div
           className={cn(
-            "container-news flex items-center justify-between gap-2",
+            "container-news relative flex items-center justify-between gap-2",
             "transition-[height] duration-[var(--duration-normal)] ease-[var(--ease-standard)]",
             scrolled ? "h-14" : "h-16 sm:h-20",
           )}
