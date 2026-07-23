@@ -1,5 +1,5 @@
 import { getCategoryBySlug } from "@/constants/categories";
-import type { NewsArticle, NewsCategory } from "@/types/news";
+import type { BreakingNewsItem, BreakingNewsLevel, NewsArticle, NewsCategory } from "@/types/news";
 import { NewsApiError } from "./simulate";
 
 /**
@@ -231,7 +231,11 @@ async function pickArticleWithImage(
   );
 }
 
-async function searchNaverNews(query: string, display: number): Promise<NaverNewsItem[]> {
+async function searchNaverNews(
+  query: string,
+  display: number,
+  sort: "date" | "sim" = "date",
+): Promise<NaverNewsItem[]> {
   const clientId = process.env.NAVER_CLIENT_ID;
   const clientSecret = process.env.NAVER_CLIENT_SECRET;
 
@@ -239,7 +243,7 @@ async function searchNaverNews(query: string, display: number): Promise<NaverNew
     throw new NewsApiError("네이버 뉴스 API 키가 설정되지 않았습니다.");
   }
 
-  const url = `${NAVER_NEWS_ENDPOINT}?query=${encodeURIComponent(query)}&display=${display}&sort=date`;
+  const url = `${NAVER_NEWS_ENDPOINT}?query=${encodeURIComponent(query)}&display=${display}&sort=${sort}`;
   const response = await fetch(url, {
     headers: {
       "X-Naver-Client-Id": clientId,
@@ -295,4 +299,48 @@ export async function fetchNaverSecondaryArticles(limit = 6): Promise<NewsArticl
   }
 
   return articles;
+}
+
+/**
+ * 헤더 아래 속보 티커(`BreakingTicker`)용 항목.
+ *
+ * 이전에는 mock 데이터를 쓰면서 클릭 자체가 연결돼 있지 않았다 — 이제 실제
+ * "속보" 검색 결과의 원문 링크(`externalUrl`)를 그대로 달아서 클릭하면
+ * 원문 기사로 이동하게 한다.
+ */
+export async function fetchNaverBreakingTicker(limit = 8): Promise<BreakingNewsItem[]> {
+  const items = await searchNaverNews("속보", limit);
+  if (items.length === 0) {
+    throw new NewsApiError("네이버 뉴스 검색 결과가 없습니다.");
+  }
+
+  return items.map((item, index) => {
+    const level: BreakingNewsLevel = index === 0 ? "critical" : index < 3 ? "urgent" : "normal";
+    return {
+      id: `naver-breaking-${index}-${item.link}`,
+      title: cleanText(item.title),
+      timestamp: new Date(item.pubDate).toISOString(),
+      level,
+      isActive: true,
+      externalUrl: item.originallink || item.link,
+    };
+  });
+}
+
+/**
+ * 검색 페이지(`/search?q=`)와 실시간 인기 검색어 클릭이 실제 기사로
+ * 이어지도록, 검색어를 네이버 뉴스 검색 API에 그대로 넘겨 실제 결과를
+ * 가져온다. 네이버는 카테고리 개념이 없는 키워드 검색이라 결과 카테고리는
+ * 임의로 "사회"로 채운다(배지 표시용일 뿐 실제 분류 의미는 없음).
+ */
+export async function fetchNaverSearchResults(query: string, display = 10): Promise<NewsArticle[]> {
+  const category = getCategoryBySlug("society");
+  if (!category) {
+    throw new NewsApiError("society 카테고리를 찾을 수 없습니다.");
+  }
+
+  const items = await searchNaverNews(query, display, "sim");
+  if (items.length === 0) return [];
+
+  return Promise.all(items.map((item, index) => withOgImage(toNewsArticle(item, category, index))));
 }

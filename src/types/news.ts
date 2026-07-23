@@ -176,6 +176,8 @@ export interface BreakingNewsItem {
   timestamp: string;
   level: BreakingNewsLevel;
   isActive: boolean;
+  /** 실제 뉴스 API(네이버)에서 온 항목의 원문 URL. 있으면 이 URL로 링크한다 */
+  externalUrl?: string;
 }
 
 export type TrendingKeywordChange = "up" | "down" | "same" | "new";

@@ -1,14 +1,32 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
+import Link from "next/link";
 import { Radio } from "lucide-react";
 import { MOCK_BREAKING_NEWS } from "@/data/mock-breaking-news";
+import { MOCK_NEWS } from "@/data/mock-news";
 import { BreakingBadge } from "@/components/ui/breaking-badge";
 import { LiveBadge } from "@/components/ui/live-badge";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { cn } from "@/lib/utils";
 import type { BreakingNewsItem } from "@/types/news";
+
+/**
+ * 티커 항목이 실제로 이동할 곳을 찾는다.
+ *
+ * 네이버 연동 항목은 `externalUrl`(원문 링크)을 그대로 쓰고, mock 항목은
+ * `articleId`로 자체 상세 페이지(`/news/[slug]`)를 찾는다. 둘 다 없는
+ * 레거시 mock 항목(가상의 속보)은 이동할 곳이 없어 클릭 불가능하게 둔다.
+ */
+function resolveTickerHref(item: BreakingNewsItem): string | undefined {
+  if (item.externalUrl) return item.externalUrl;
+  if (item.articleId) {
+    const article = MOCK_NEWS.find((candidate) => candidate.id === item.articleId);
+    if (article) return `/news/${article.slug}`;
+  }
+  return undefined;
+}
 
 export interface BreakingTickerProps {
   items?: BreakingNewsItem[];
@@ -92,25 +110,42 @@ function TickerTrack({
 }) {
   return (
     <ul className="flex items-center" aria-hidden={ariaHidden || undefined}>
-      {items.map((item, index) => (
-        <li key={`${item.id}-${ariaHidden ? "dup" : "src"}-${index}`} className="flex shrink-0 items-center">
-          <button
-            type="button"
-            tabIndex={ariaHidden ? -1 : 0}
-            title={item.title}
-            className={cn(
-              "type-breaking-ticker flex max-w-[60vw] items-center gap-2 px-4 py-2.5 text-left text-text-primary sm:max-w-sm",
-              "transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]",
-              "hover:text-accent-primary focus-visible:text-accent-primary",
+      {items.map((item, index) => {
+        const href = resolveTickerHref(item);
+        const isExternal = href?.startsWith("http") ?? false;
+        const itemClassName = cn(
+          "type-breaking-ticker flex max-w-[60vw] items-center gap-2 px-4 py-2.5 text-left text-text-primary sm:max-w-sm",
+          "transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]",
+          href && "hover:text-accent-primary focus-visible:text-accent-primary",
+          !href && "cursor-default",
+        );
+
+        return (
+          <li key={`${item.id}-${ariaHidden ? "dup" : "src"}-${index}`} className="flex shrink-0 items-center">
+            {href ? (
+              <Link
+                href={href}
+                tabIndex={ariaHidden ? -1 : 0}
+                title={item.title}
+                target={isExternal ? "_blank" : undefined}
+                rel={isExternal ? "noopener noreferrer" : undefined}
+                className={itemClassName}
+              >
+                <BreakingBadge level={item.level} iconOnly />
+                <span className="truncate">{item.title}</span>
+                <TimeAgo date={item.timestamp} className="hidden shrink-0 text-text-muted sm:inline" />
+              </Link>
+            ) : (
+              <span tabIndex={ariaHidden ? -1 : 0} title={item.title} className={itemClassName}>
+                <BreakingBadge level={item.level} iconOnly />
+                <span className="truncate">{item.title}</span>
+                <TimeAgo date={item.timestamp} className="hidden shrink-0 text-text-muted sm:inline" />
+              </span>
             )}
-          >
-            <BreakingBadge level={item.level} iconOnly />
-            <span className="truncate">{item.title}</span>
-            <TimeAgo date={item.timestamp} className="hidden shrink-0 text-text-muted sm:inline" />
-          </button>
-          <span aria-hidden className="mx-1 h-1 w-1 shrink-0 rounded-full bg-border-strong" />
-        </li>
-      ))}
+            <span aria-hidden className="mx-1 h-1 w-1 shrink-0 rounded-full bg-border-strong" />
+          </li>
+        );
+      })}
     </ul>
   );
 }
