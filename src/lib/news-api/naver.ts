@@ -159,6 +159,35 @@ const WIDTH_ATTR_PATTERN = /\bwidth\s*=\s*["']?(\d+)/i;
 const HEIGHT_ATTR_PATTERN = /\bheight\s*=\s*["']?(\d+)/i;
 const TINY_OR_ICON_IMAGE_PATTERN = /icon|sprite|pixel|blank\.(?:gif|png)|\.svg(?:[?#]|$)/i;
 const MIN_BODY_IMAGE_DIMENSION = 200;
+/** 실제 기사 사진은 이 정도보다는 큰 파일이다 — 아이콘/썸네일은 보통 수 KB대. */
+const MIN_BODY_IMAGE_BYTES = 8_000;
+
+/** width/height 속성이 있는데 너무 작다고 "확정"되는 경우만 걸러낸다(과도 필터 방지) */
+function isDeclaredTooSmall(tag: string): boolean {
+  const width = Number(tag.match(WIDTH_ATTR_PATTERN)?.[1]);
+  const height = Number(tag.match(HEIGHT_ATTR_PATTERN)?.[1]);
+  if (!width || !height) return false;
+  return width < MIN_BODY_IMAGE_DIMENSION || height < MIN_BODY_IMAGE_DIMENSION;
+}
+
+/**
+ * width/height 속성이 없는(요즘 마크업엔 흔함) 후보는 HEAD 요청으로
+ * `Content-Length`만 짧게 확인해 너무 작은 파일(아이콘/썸네일)을
+ * 걸러낸다. 실패/타임아웃이면 보수적으로 채택하지 않는다.
+ */
+async function isLikelyRealPhoto(imageUrl: string): Promise<boolean> {
+  try {
+    const response = await fetch(imageUrl, {
+      method: "HEAD",
+      signal: AbortSignal.timeout(800),
+    });
+    if (!response.ok) return false;
+    const length = Number(response.headers.get("content-length"));
+    return Number.isFinite(length) && length >= MIN_BODY_IMAGE_BYTES;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * `og:image`/`twitter:image`가 아예 없는 사이트를 위한 최후 폴백 —
@@ -166,30 +195,29 @@ const MIN_BODY_IMAGE_DIMENSION = 200;
  * 고른다. data URI, 아이콘/스프라이트류, 로고 같은 사이트 공용 이미지는
  * 기사 사진이 아니므로 건너뛴다.
  *
- * `width`/`height` 속성이 둘 다 있고 충분히 큰 경우에만 채택한다 —
- * 처음엔 이 검증 없이 첫 `<img>`를 그냥 썼더니, 관련기사 썸네일처럼
- * 실제로는 작은 이미지를 카드 전체 크기로 늘려서 뿌옇게 깨진 채로 보이는
- * 사고가 있었다. 크기를 알 수 없는 이미지는 차라리 카테고리
- * placeholder(+ 제목 오버레이)로 두는 게 더 안전하므로 건너뛴다.
+ * 관련기사 썸네일 같은 작은 이미지를 카드 전체 크기로 늘려서 뿌옇게 깨진
+ * 채로 보이는 사고가 있었다 — 그렇다고 `width`/`height` 속성을 무조건
+ * 요구하면(1차 수정) 그 속성 자체를 안 쓰는 최신 마크업에서 폴백이 거의
+ * 항상 실패해 원래 목적(placeholder보다 나은 사진 보여주기)을 잃는다.
+ * 그래서 속성이 있으면 그걸로 걸러내고, 없으면 HEAD로 파일 크기만 짧게
+ * 확인해 너무 작은 파일을 제외한다.
  */
-function extractFirstBodyImage(html: string): string | undefined {
+async function extractFirstBodyImage(html: string): Promise<string | undefined> {
   const bodyStart = html.search(/<body\b/i);
   const searchArea = bodyStart >= 0 ? html.slice(bodyStart) : html;
 
   for (const tag of searchArea.match(BODY_IMAGE_PATTERN) ?? []) {
     const raw = tag.match(SRC_ATTR_PATTERN)?.[1];
     if (!raw || raw.startsWith("data:")) continue;
-
-    const width = Number(tag.match(WIDTH_ATTR_PATTERN)?.[1]);
-    const height = Number(tag.match(HEIGHT_ATTR_PATTERN)?.[1]);
-    if (!width || !height || width < MIN_BODY_IMAGE_DIMENSION || height < MIN_BODY_IMAGE_DIMENSION) {
-      continue;
-    }
+    if (isDeclaredTooSmall(tag)) continue;
 
     const imageUrl = decodeHtmlEntities(raw);
     if (isGenericSiteImage(imageUrl) || TINY_OR_ICON_IMAGE_PATTERN.test(imageUrl)) continue;
 
-    return imageUrl;
+    const hasDeclaredSize = WIDTH_ATTR_PATTERN.test(tag) && HEIGHT_ATTR_PATTERN.test(tag);
+    if (hasDeclaredSize || (await isLikelyRealPhoto(imageUrl))) {
+      return imageUrl;
+    }
   }
   return undefined;
 }
@@ -225,7 +253,6 @@ async function fetchOgImage(pageUrl: string): Promise<string | undefined> {
 
     const decoder = new TextDecoder();
     let html = "";
-    let headEnded = false;
     while (html.length < 150_000) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -236,24 +263,14 @@ async function fetchOgImage(pageUrl: string): Promise<string | undefined> {
         reader.cancel().catch(() => {});
         return new URL(match, pageUrl).toString();
       }
-
-      // og:image/twitter:image가 <head> 안에 없는 사이트도 있다 — 그런
-      // 경우 바로 포기하지 않고, <body> 앞부분에서 기사 사진으로 보이는
-      // 첫 <img>를 마저 찾아본다 (150KB/2.5초 예산은 그대로 공유한다).
-      if (!headEnded && /<\/head>/i.test(html)) {
-        headEnded = true;
-      }
-      if (headEnded) {
-        const bodyMatch = extractFirstBodyImage(html);
-        if (bodyMatch) {
-          reader.cancel().catch(() => {});
-          return new URL(bodyMatch, pageUrl).toString();
-        }
-      }
     }
     reader.cancel().catch(() => {});
 
-    const finalMatch = extractOgImage(html) ?? extractFirstBodyImage(html);
+    // og:image/twitter:image가 <head> 안에 없는 사이트도 있다 — 그런
+    // 경우 바로 포기하지 않고, <body> 앞부분에서 기사 사진으로 보이는 첫
+    // <img>를 찾아본다(크기 검증 포함). 후보별 HEAD 요청이 있을 수 있어
+    // 스트리밍 중 매 청크마다 부르지 않고 다 읽은 뒤 한 번만 시도한다.
+    const finalMatch = extractOgImage(html) ?? (await extractFirstBodyImage(html));
     return finalMatch ? new URL(finalMatch, pageUrl).toString() : undefined;
   } catch {
     return undefined;
