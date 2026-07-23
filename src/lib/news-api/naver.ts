@@ -265,6 +265,17 @@ async function pickArticleWithImage(
   );
 }
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * 여러 카테고리 페이지가 ISR로 거의 동시에 재검증되면 네이버 API에
+ * 순간적으로 요청이 몰려 429/5xx가 튈 때가 있다. 이 경우 그대로
+ * mock으로 폴백하면 방금 전까지 실제 뉴스가 보이던 페이지가 다음 재검증
+ * 주기에 아무 예고 없이 가짜 기사로 바뀌어 보인다 — 짧게 한 번 재시도해서
+ * 이런 일시적 실패를 흡수한다.
+ */
 async function searchNaverNews(
   query: string,
   display: number,
@@ -278,21 +289,31 @@ async function searchNaverNews(
   }
 
   const url = `${NAVER_NEWS_ENDPOINT}?query=${encodeURIComponent(query)}&display=${display}&sort=${sort}`;
-  const response = await fetch(url, {
-    headers: {
-      "X-Naver-Client-Id": clientId,
-      "X-Naver-Client-Secret": clientSecret,
-    },
-    // 완전히 실시간은 아니지만 60초마다 새로 가져와 최신 상태를 유지한다.
-    next: { revalidate: 60 },
-  });
+  const headers = {
+    "X-Naver-Client-Id": clientId,
+    "X-Naver-Client-Secret": clientSecret,
+  };
 
-  if (!response.ok) {
-    throw new NewsApiError(`네이버 뉴스 API 호출에 실패했습니다. (${response.status})`);
+  let lastStatus = 0;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    if (attempt > 0) await delay(400);
+
+    const response = await fetch(url, {
+      headers,
+      // 완전히 실시간은 아니지만 60초마다 새로 가져와 최신 상태를 유지한다.
+      next: { revalidate: 60 },
+    });
+
+    if (response.ok) {
+      const data = (await response.json()) as NaverNewsResponse;
+      return data.items ?? [];
+    }
+
+    lastStatus = response.status;
+    if (response.status !== 429 && response.status < 500) break;
   }
 
-  const data = (await response.json()) as NaverNewsResponse;
-  return data.items ?? [];
+  throw new NewsApiError(`네이버 뉴스 API 호출에 실패했습니다. (${lastStatus})`);
 }
 
 /** 홈페이지 Featured Hero용 대표 기사 1건 (최신 속보 키워드 기준) */
