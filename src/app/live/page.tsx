@@ -41,6 +41,10 @@ export default function LivePage() {
             title="YTN 실시간 뉴스 생중계"
             className="absolute inset-0 h-full w-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            // referrerPolicy 없이는 유튜브가 리퍼러를 못 받아 "Error 153:
+            // Video player configuration error"(embedder.identity.missing.referrer)로
+            // 재생을 거부한다 — 명시적으로 지정해야 한다.
+            referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           />
         </div>
