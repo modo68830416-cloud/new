@@ -42,6 +42,7 @@ export function SecondaryNewsGrid({ articles, className }: SecondaryNewsGridProp
     >
       {items.map((article, index) => {
         const href = article.externalUrl ?? `/news/${article.slug}`;
+        const isPlaceholderThumbnail = article.thumbnail.url.startsWith("/placeholders/");
         return (
         <SlideUp
           key={article.id}
@@ -67,6 +68,14 @@ export function SecondaryNewsGrid({ articles, className }: SecondaryNewsGridProp
                 sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                 className="object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-110"
               />
+              {isPlaceholderThumbnail && (
+                <div
+                  aria-hidden
+                  className="bg-gradient-image-readability pointer-events-none absolute inset-0 flex items-end p-3"
+                >
+                  <p className="type-card-title line-clamp-3 text-white">{article.title}</p>
+                </div>
+              )}
             </div>
             <div className="flex flex-1 flex-col gap-2 p-4">
               <CategoryBadge category={article.category} size="sm" />

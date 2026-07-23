@@ -82,6 +82,26 @@ const OG_IMAGE_NAME_PATTERN =
 const CONTENT_ATTR_PATTERN = /content\s*=\s*["']([^"']+)["']/i;
 
 /**
+ * 기사 사진이 아니라 언론사가 모든 기사에 공통으로 박아두는 기본
+ * 로고/공유용 이미지로 보이면 걸러낸다 (예: 매일경제의
+ * `facebook_mknews.jpg`처럼 사이트 전체에서 재사용되는 고정 파일명).
+ * 이런 이미지는 실제로는 "기사 사진 없음"과 같으므로, 후보 기사 여러 건 중
+ * 진짜 사진이 있는 다음 후보로 넘어가게 한다.
+ */
+const GENERIC_IMAGE_PATTERN =
+  /facebook_|default[._-]|no[_-]?image|noimage|og[_-]?default|share[_-]?default|snslogo|sns[_-]?default|logo/i;
+
+function isGenericSiteImage(imageUrl: string): boolean {
+  try {
+    const { pathname } = new URL(imageUrl);
+    const filename = pathname.split("/").pop() ?? "";
+    return GENERIC_IMAGE_PATTERN.test(filename);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * HTML 문자열에서 og:image(또는 twitter:image) 메타 태그의 content를 찾는다.
  *
  * `<meta property="og:image" content="...">`와 `<meta content="..."
@@ -94,7 +114,7 @@ function extractOgImage(html: string): string | undefined {
   for (const tag of metaTags) {
     if (!OG_IMAGE_NAME_PATTERN.test(tag)) continue;
     const contentMatch = tag.match(CONTENT_ATTR_PATTERN);
-    if (contentMatch) return contentMatch[1];
+    if (contentMatch && !isGenericSiteImage(contentMatch[1])) return contentMatch[1];
   }
   return undefined;
 }
