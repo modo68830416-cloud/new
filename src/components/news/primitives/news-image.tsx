@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ImageOff } from "lucide-react";
 import { Surface } from "@/components/ui/surface";
 import { cn } from "@/lib/utils";
+import { isPlaceholderThumbnail } from "./news-image-placeholder";
 import type { NewsImageOverlay, NewsImageProps, NewsImageRatio } from "../news.types";
 
 const RATIO_CLASSES: Record<NewsImageRatio, string> = {
@@ -48,6 +49,14 @@ export function NewsImage({
 }: NewsImageProps) {
   const [loadFailed, setLoadFailed] = useState(false);
   const showImage = Boolean(src) && !loadFailed;
+
+  // 실제 사진 없이 카테고리 placeholder만 있고 오버레이 텍스트도 없는
+  // 경우(목록형 카드, 기사 상세 히어로 등)는 빈 그라데이션 박스를 보여주는
+  // 대신 이미지 영역 자체를 렌더링하지 않는다. `overlayContent`가 있는
+  // 히어로류 카드는 그 위에 제목을 얹어 보여줘야 하므로 그대로 유지한다.
+  if (src && isPlaceholderThumbnail(src as string) && !overlayContent) {
+    return null;
+  }
 
   return (
     <div

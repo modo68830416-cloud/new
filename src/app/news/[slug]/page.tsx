@@ -7,6 +7,7 @@ import { buildArticleBody, extractHeadings } from "@/data/mock-article-body";
 import { siteConfig } from "@/config/site";
 import { CategoryBadge } from "@/components/ui/category-badge";
 import { NewsImage } from "@/components/news";
+import { isPlaceholderThumbnail } from "@/components/news/primitives/news-image-placeholder";
 import {
   ArticleBody,
   ArticleMeta,
@@ -98,12 +99,14 @@ export default async function NewsDetailPage({
               </div>
             </header>
 
-            <figure className="flex flex-col gap-2">
-              <NewsImage src={hero.url} alt={hero.alt} ratio="16:9" priority className="rounded-lg" />
-              {hero.caption && (
-                <figcaption className="type-caption text-text-muted">{hero.caption}</figcaption>
-              )}
-            </figure>
+            {!isPlaceholderThumbnail(hero.url) && (
+              <figure className="flex flex-col gap-2">
+                <NewsImage src={hero.url} alt={hero.alt} ratio="16:9" priority className="rounded-lg" />
+                {hero.caption && (
+                  <figcaption className="type-caption text-text-muted">{hero.caption}</figcaption>
+                )}
+              </figure>
+            )}
 
             {/* 설정 페이지의 글자 크기 환경설정(TASK-011)이 본문에만 적용되도록
                 이 컨테이너 안에서만 --text-* 토큰을 --font-scale-reading 배율만큼
