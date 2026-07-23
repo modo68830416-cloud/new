@@ -67,23 +67,23 @@ export function FeaturedHero({ article, className }: FeaturedHeroProps) {
             )}
           </div>
 
-          <h2 className="type-hero-title line-clamp-3 break-keep text-text-primary">
+          <h2 className="type-hero-title line-clamp-3 break-keep text-white [text-shadow:0_1px_12px_rgba(0,0,0,0.5)]">
             <NewsCardLink href={href}>{featured.title}</NewsCardLink>
           </h2>
 
-          <p className="type-body line-clamp-2 max-w-2xl text-text-secondary sm:line-clamp-3">
+          <p className="type-body line-clamp-2 max-w-2xl text-white/85 sm:line-clamp-3">
             {featured.summary}
           </p>
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {featured.author?.name && (
-              <span className="type-caption text-text-secondary">
+              <span className="type-caption text-white/75">
                 {featured.author.name} 기자
               </span>
             )}
-            <TimeAgo date={featured.publishedAt} className="text-text-secondary" />
+            <TimeAgo date={featured.publishedAt} className="text-white/75" />
             {!featured.externalUrl && (
-              <ViewCount count={featured.viewCount} className="text-text-secondary" />
+              <ViewCount count={featured.viewCount} className="text-white/75" />
             )}
           </div>
 
