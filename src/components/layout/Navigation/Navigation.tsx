@@ -80,7 +80,7 @@ export function Navigation({ className, activeHref, forceVisible = false }: Navi
                 className={cn(
                   "type-caption relative inline-flex items-center px-3 py-2 text-white/75",
                   "transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]",
-                  "hover:text-white focus-visible:text-white",
+                  "hover:text-white focus-visible:text-white focus-visible:outline-white",
                   active && "font-semibold text-white",
                 )}
               >

@@ -41,6 +41,11 @@ export function StandardNewsCardSkeleton({ className }: NewsCardSkeletonProps) {
         <Skeleton className="h-4 w-16 rounded-full" />
         <Skeleton className="h-5 w-full" />
         <Skeleton className="h-5 w-3/4" />
+        {/* NewsCardGrid의 기본 카드 크기(medium)는 요약 2줄을 함께 보여준다
+            (StandardNewsCard의 DEFAULT_SUMMARY_BY_SIZE) — 스켈레톤에도 같은
+            높이를 확보해 실제 카드로 전환될 때 레이아웃이 덜컹이지 않게 한다. */}
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
         <Skeleton className="mt-auto h-3.5 w-1/2" />
       </div>
     </Card>

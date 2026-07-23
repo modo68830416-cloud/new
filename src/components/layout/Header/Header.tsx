@@ -81,7 +81,7 @@ export function Header({ className }: HeaderProps) {
               label={mobileNavOpen ? "메뉴 닫기" : "전체 메뉴 열기"}
               icon={mobileNavOpen ? <X size={18} aria-hidden /> : <Menu size={18} aria-hidden />}
               variant="ghost"
-              className="text-white hover:bg-white/15 lg:hidden"
+              className="text-white hover:bg-white/15 focus-visible:outline-white lg:hidden"
               aria-expanded={mobileNavOpen}
               aria-haspopup="dialog"
               onClick={() => setMobileNavOpen((prev) => !prev)}
@@ -89,7 +89,7 @@ export function Header({ className }: HeaderProps) {
 
             <Link
               href="/"
-              className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <span className="text-lg font-extrabold tracking-tight text-white sm:text-xl">
                 {siteConfig.siteShortName}
@@ -135,7 +135,7 @@ export function Header({ className }: HeaderProps) {
                   label="검색 열기"
                   icon={<Search size={18} aria-hidden />}
                   variant="ghost"
-                  className="text-white hover:bg-white/15"
+                  className="text-white hover:bg-white/15 focus-visible:outline-white"
                   onClick={() => setSearchOpen(true)}
                 />
               )}
@@ -143,7 +143,7 @@ export function Header({ className }: HeaderProps) {
 
             <ThemeToggle
               variant="icon"
-              className="hidden text-white hover:bg-white/15 sm:inline-flex"
+              className="hidden text-white hover:bg-white/15 focus-visible:outline-white sm:inline-flex"
             />
           </div>
         </div>

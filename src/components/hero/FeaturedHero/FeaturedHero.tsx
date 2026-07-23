@@ -61,7 +61,7 @@ export function FeaturedHero({ article, className }: FeaturedHeroProps) {
             <CategoryBadge category={featured.category} />
             {featured.isBreaking && <BreakingBadge level="critical" />}
             {featured.isExclusive && (
-              <span className="type-label border-exclusive text-exclusive rounded-full border px-2.5 py-1">
+              <span className="type-label rounded-full border border-white/70 px-2.5 py-1 text-white">
                 단독
               </span>
             )}
