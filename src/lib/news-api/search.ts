@@ -28,7 +28,12 @@ export const fetchSearchResults = cache(async function fetchSearchResults(
 ): Promise<NewsArticle[]> {
   if (query.trim() && !isSearchFilterActive(filters) && isNaverNewsConfigured()) {
     try {
-      return await fetchNaverSearchResults(query);
+      const naverResults = await fetchNaverSearchResults(query);
+      if (naverResults.length > 0) {
+        return naverResults;
+      }
+      // 네이버가 정상 응답했지만 결과가 0건인 경우(예: mock 전용 가상 인물/기업
+      // 키워드)도 실제 결과가 없다는 신호이므로 mock으로 폴백한다.
     } catch (error) {
       console.error("[news-api] 네이버 뉴스(검색) 조회 실패, mock으로 폴백:", error);
     }
