@@ -3,7 +3,9 @@ import { Surface } from "@/components/ui/surface";
 import { LiveBadge } from "@/components/ui/live-badge";
 import { siteConfig } from "@/config/site";
 
+const YTN_CHANNEL_URL = "https://www.youtube.com/@ytnnews24";
 const YTN_CHANNEL_ID = "UChlgI3UHCOnwUGzWzbJ3H5w";
+const VIDEO_ID_PATTERN = /"videoId":"([a-zA-Z0-9_-]{11})"/;
 
 export const metadata: Metadata = {
   title: "실시간 생중계",
@@ -11,16 +13,41 @@ export const metadata: Metadata = {
 };
 
 /**
- * 헤더 LIVE 뱃지의 목적지 (`/live`).
+ * YTN 채널의 "현재 방송 중인" 영상 ID를 알아낸다.
  *
- * 자체 방송 인프라가 없으므로 직접 송출하는 대신, YTN 공식 유튜브 채널의
- * 라이브 스트림을 유튜브 공식 임베드 플레이어로 그대로 보여준다.
- * `embed/live_stream?channel=`은 유튜브가 공식 제공하는 URL 형식으로, 그
- * 채널에서 현재 진행 중인 라이브를 자동으로 찾아 재생한다 — 특정
- * videoId를 하드코딩하지 않아도 방송이 바뀌어도 계속 최신 라이브를
- * 가리킨다.
+ * `embed/live_stream?channel=`(videoId 없이 채널만 지정하는 공식 임베드
+ * URL)로 시도해봤지만 이 채널에서는 재생이 거부됐다 — 유튜브의
+ * "채널 단위 라이브 임베드"는 채널이 별도로 켜둔 기능(구독자 1,000명
+ * 이상 + "Embed Live Streams" 옵션)이 있어야만 동작하는데, YTN이 이걸
+ * 켜두지 않은 것으로 보인다. 반면 실제 videoId로 직접 임베드하는 건
+ * oEmbed로 재생 가능함을 확인했으므로, `/live` 리다이렉트 페이지에서
+ * 현재 videoId를 읽어와 그 ID로 직접 임베드한다.
  */
-export default function LivePage() {
+async function resolveLiveVideoId(): Promise<string | null> {
+  try {
+    const response = await fetch(`${YTN_CHANNEL_URL}/live`, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      },
+      signal: AbortSignal.timeout(4000),
+      next: { revalidate: 300 },
+    });
+    if (!response.ok) return null;
+
+    const html = await response.text();
+    return html.match(VIDEO_ID_PATTERN)?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function LivePage() {
+  const liveVideoId = await resolveLiveVideoId();
+  const embedSrc = liveVideoId
+    ? `https://www.youtube.com/embed/${liveVideoId}?autoplay=0`
+    : `https://www.youtube.com/embed/live_stream?channel=${YTN_CHANNEL_ID}&autoplay=0`;
+
   return (
     <div className="container-dashboard flex flex-col gap-6 py-8 lg:py-12">
       <header className="flex flex-col gap-3">
@@ -37,7 +64,7 @@ export default function LivePage() {
       <Surface radius="xl" shadow="sm" bordered className="overflow-hidden">
         <div className="relative aspect-video w-full">
           <iframe
-            src={`https://www.youtube.com/embed/live_stream?channel=${YTN_CHANNEL_ID}&autoplay=0`}
+            src={embedSrc}
             title="YTN 실시간 뉴스 생중계"
             className="absolute inset-0 h-full w-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -53,14 +80,15 @@ export default function LivePage() {
       <p className="type-caption text-text-muted">
         영상 제공:{" "}
         <a
-          href="https://www.youtube.com/@ytnnews24"
+          href={`${YTN_CHANNEL_URL}/live`}
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 hover:text-text-secondary"
         >
           YTN 공식 유튜브
         </a>
-        {" "}· 유튜브 공식 임베드 플레이어를 사용합니다.
+        {" "}· 화면이 재생되지 않으면 위 링크로 유튜브에서 직접 시청할 수
+        있습니다.
       </p>
     </div>
   );
