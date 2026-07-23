@@ -105,7 +105,7 @@ export function Header({ className }: HeaderProps) {
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <Link
               href="/live"
-              className="hidden rounded-full transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:inline-flex"
+              className="inline-flex shrink-0 rounded-full transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               aria-label="실시간 뉴스 생중계 보기"
             >
               <LiveBadge />
