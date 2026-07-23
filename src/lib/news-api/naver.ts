@@ -153,6 +153,31 @@ function extractOgImage(html: string): string | undefined {
   return undefined;
 }
 
+const BODY_IMAGE_PATTERN = /<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/gi;
+const TINY_OR_ICON_IMAGE_PATTERN = /icon|sprite|pixel|blank\.(?:gif|png)|\.svg(?:[?#]|$)/i;
+
+/**
+ * `og:image`/`twitter:image`가 아예 없는 사이트를 위한 최후 폴백 —
+ * `<body>` 안에서 처음 나오는 "실제 사진처럼 보이는" `<img>` 하나를
+ * 고른다. data URI, 아이콘/스프라이트류, 로고 같은 사이트 공용 이미지는
+ * 기사 사진이 아니므로 건너뛴다.
+ */
+function extractFirstBodyImage(html: string): string | undefined {
+  const bodyStart = html.search(/<body\b/i);
+  const searchArea = bodyStart >= 0 ? html.slice(bodyStart) : html;
+
+  for (const match of searchArea.matchAll(BODY_IMAGE_PATTERN)) {
+    const raw = match[1];
+    if (!raw || raw.startsWith("data:")) continue;
+
+    const imageUrl = decodeHtmlEntities(raw);
+    if (isGenericSiteImage(imageUrl) || TINY_OR_ICON_IMAGE_PATTERN.test(imageUrl)) continue;
+
+    return imageUrl;
+  }
+  return undefined;
+}
+
 /**
  * 원문 기사 페이지에서 Open Graph 이미지를 추출한다.
  *
@@ -184,22 +209,35 @@ async function fetchOgImage(pageUrl: string): Promise<string | undefined> {
 
     const decoder = new TextDecoder();
     let html = "";
+    let headEnded = false;
     while (html.length < 150_000) {
       const { done, value } = await reader.read();
       if (done) break;
       html += decoder.decode(value, { stream: true });
-
-      if (/<\/head>/i.test(html)) break;
 
       const match = extractOgImage(html);
       if (match) {
         reader.cancel().catch(() => {});
         return new URL(match, pageUrl).toString();
       }
+
+      // og:image/twitter:image가 <head> 안에 없는 사이트도 있다 — 그런
+      // 경우 바로 포기하지 않고, <body> 앞부분에서 기사 사진으로 보이는
+      // 첫 <img>를 마저 찾아본다 (150KB/2.5초 예산은 그대로 공유한다).
+      if (!headEnded && /<\/head>/i.test(html)) {
+        headEnded = true;
+      }
+      if (headEnded) {
+        const bodyMatch = extractFirstBodyImage(html);
+        if (bodyMatch) {
+          reader.cancel().catch(() => {});
+          return new URL(bodyMatch, pageUrl).toString();
+        }
+      }
     }
     reader.cancel().catch(() => {});
 
-    const finalMatch = extractOgImage(html);
+    const finalMatch = extractOgImage(html) ?? extractFirstBodyImage(html);
     return finalMatch ? new URL(finalMatch, pageUrl).toString() : undefined;
   } catch {
     return undefined;
