@@ -81,7 +81,7 @@ export function Header({ className }: HeaderProps) {
               label={mobileNavOpen ? "메뉴 닫기" : "전체 메뉴 열기"}
               icon={mobileNavOpen ? <X size={18} aria-hidden /> : <Menu size={18} aria-hidden />}
               variant="ghost"
-              className="lg:hidden"
+              className="text-white hover:bg-white/15 lg:hidden"
               aria-expanded={mobileNavOpen}
               aria-haspopup="dialog"
               onClick={() => setMobileNavOpen((prev) => !prev)}
@@ -91,10 +91,10 @@ export function Header({ className }: HeaderProps) {
               href="/"
               className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2"
             >
-              <span className="bg-gradient-brand bg-clip-text text-lg font-extrabold tracking-tight text-transparent sm:text-xl">
+              <span className="text-lg font-extrabold tracking-tight text-white sm:text-xl">
                 {siteConfig.siteShortName}
               </span>
-              <span className="type-caption hidden font-normal text-text-secondary sm:inline">
+              <span className="type-caption hidden font-normal text-white/75 sm:inline">
                 {siteConfig.siteName}
               </span>
             </Link>
@@ -135,12 +135,16 @@ export function Header({ className }: HeaderProps) {
                   label="검색 열기"
                   icon={<Search size={18} aria-hidden />}
                   variant="ghost"
+                  className="text-white hover:bg-white/15"
                   onClick={() => setSearchOpen(true)}
                 />
               )}
             </div>
 
-            <ThemeToggle variant="icon" className="hidden sm:inline-flex" />
+            <ThemeToggle
+              variant="icon"
+              className="hidden text-white hover:bg-white/15 sm:inline-flex"
+            />
           </div>
         </div>
       </header>

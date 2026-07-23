@@ -78,10 +78,10 @@ export function Navigation({ className, activeHref, forceVisible = false }: Navi
                 aria-current={active ? "page" : undefined}
                 onKeyDown={(event) => handleKeyDown(event, index)}
                 className={cn(
-                  "type-caption relative inline-flex items-center px-3 py-2 text-text-secondary",
+                  "type-caption relative inline-flex items-center px-3 py-2 text-white/75",
                   "transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]",
-                  "hover:text-text-primary focus-visible:text-text-primary",
-                  active && "font-semibold text-text-primary",
+                  "hover:text-white focus-visible:text-white",
+                  active && "font-semibold text-white",
                 )}
               >
                 {item.label}
@@ -89,7 +89,7 @@ export function Navigation({ className, activeHref, forceVisible = false }: Navi
                   <motion.span
                     layoutId={prefersReducedMotion ? undefined : "desktop-nav-underline"}
                     aria-hidden
-                    className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-accent-primary"
+                    className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-white"
                     transition={prefersReducedMotion ? { duration: 0 } : transitionStandard}
                   />
                 )}
