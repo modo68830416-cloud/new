@@ -11,6 +11,7 @@ import { getArticlesByTagSlug } from "@/data/mock-search";
 import { getFeaturedHeroArticle, getSecondaryHeroArticles } from "@/lib/hero-articles";
 import { simulateNetwork } from "./simulate";
 import {
+  fetchNaverArticlesByCategory,
   fetchNaverFeaturedArticle,
   fetchNaverSecondaryArticles,
   isNaverNewsConfigured,
@@ -42,9 +43,24 @@ export const fetchPopularArticles = cache(async function fetchPopularArticles(
   return getPopularArticles(limit, articles);
 });
 
+/**
+ * 상단 내비게이션의 카테고리 탭(`/category/[slug]`)도 홈페이지와 동일하게
+ * 네이버 뉴스로 채운다 — 이전에는 이 페이지 전체가 mock 전용이라 실제
+ * 뉴스가 뜨는 홈페이지와 뒤섞이면 카테고리 탭만 "가상의" 기사로 남는
+ * 어색함이 있었다.
+ */
 export const fetchArticlesByCategory = cache(async function fetchArticlesByCategory(
   slug: string,
 ): Promise<NewsArticle[]> {
+  if (isNaverNewsConfigured()) {
+    try {
+      const articles = await fetchNaverArticlesByCategory(slug);
+      if (articles.length > 0) return articles;
+    } catch (error) {
+      console.error("[news-api] 네이버 뉴스(카테고리) 조회 실패, mock으로 폴백:", error);
+    }
+  }
+
   await simulateNetwork();
   return getArticlesByCategory(slug);
 });

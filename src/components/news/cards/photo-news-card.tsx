@@ -4,7 +4,7 @@ import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { NewsShareButton } from "../primitives/news-share-button";
 import { NewsImage } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
-import { NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
+import { getArticleHref, NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
 import { cn } from "@/lib/utils";
 import type { NewsCardBaseProps, NewsImageRatio, NewsTitleLevel } from "../news.types";
 
@@ -53,7 +53,7 @@ export function PhotoNewsCard({
                   {article.source?.name ? ` · ${article.source.name}` : ""}
                 </span>
                 <NewsTitle level={titleLevel} size="md" lineClamp={2}>
-                  <NewsCardLink href={`/news/${article.slug}`}>{article.title}</NewsCardLink>
+                  <NewsCardLink href={getArticleHref(article)}>{article.title}</NewsCardLink>
                 </NewsTitle>
               </div>
             </>

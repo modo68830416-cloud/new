@@ -25,7 +25,7 @@ export function NewsShareButton({ article, className }: NewsShareButtonProps) {
   function handleShare() {
     share({
       title: article.title,
-      url: `${siteConfig.siteUrl}/news/${article.slug}`,
+      url: article.externalUrl ?? `${siteConfig.siteUrl}/news/${article.slug}`,
     });
   }
 

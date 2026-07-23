@@ -28,14 +28,33 @@ interface NaverNewsResponse {
   items: NaverNewsItem[];
 }
 
+/**
+ * 카테고리 slug → 네이버 뉴스 검색 키워드. 카테고리 페이지(`/category/[slug]`)
+ * 전체와 홈페이지 Secondary Grid가 공유한다.
+ */
+const CATEGORY_QUERY_MAP: Record<string, string> = {
+  breaking: "속보",
+  politics: "정치",
+  economy: "경제",
+  society: "사회",
+  world: "국제",
+  industry: "산업",
+  "it-science": "IT 과학",
+  culture: "문화",
+  entertainment: "연예",
+  sports: "스포츠",
+  life: "생활",
+  opinion: "칼럼",
+};
+
 /** 홈페이지 Secondary Grid에 다양성을 주기 위한 카테고리별 검색 키워드 */
 const CATEGORY_QUERIES: { slug: string; query: string }[] = [
-  { slug: "politics", query: "정치" },
-  { slug: "economy", query: "경제" },
-  { slug: "society", query: "사회" },
-  { slug: "world", query: "국제" },
-  { slug: "it-science", query: "IT 과학" },
-  { slug: "sports", query: "스포츠" },
+  { slug: "politics", query: CATEGORY_QUERY_MAP.politics },
+  { slug: "economy", query: CATEGORY_QUERY_MAP.economy },
+  { slug: "society", query: CATEGORY_QUERY_MAP.society },
+  { slug: "world", query: CATEGORY_QUERY_MAP.world },
+  { slug: "it-science", query: CATEGORY_QUERY_MAP["it-science"] },
+  { slug: "sports", query: CATEGORY_QUERY_MAP.sports },
 ];
 
 export function isNaverNewsConfigured(): boolean {
@@ -340,6 +359,29 @@ export async function fetchNaverSearchResults(query: string, display = 10): Prom
   }
 
   const items = await searchNaverNews(query, display, "sim");
+  if (items.length === 0) return [];
+
+  return Promise.all(items.map((item, index) => withOgImage(toNewsArticle(item, category, index))));
+}
+
+/**
+ * 카테고리 페이지(`/category/[slug]`)용 기사 목록.
+ *
+ * 이전에는 이 페이지 전체가 mock 전용이라 상단 내비게이션의 카테고리
+ * 탭(예: "속보")을 누르면 홈페이지의 실제 뉴스와 무관한 가상의 mock
+ * 기사만 나왔다 — 같은 방식으로 실제 검색 결과를 채운다.
+ */
+export async function fetchNaverArticlesByCategory(
+  slug: string,
+  limit = 16,
+): Promise<NewsArticle[]> {
+  const category = getCategoryBySlug(slug);
+  const query = CATEGORY_QUERY_MAP[slug];
+  if (!category || !query) {
+    throw new NewsApiError(`지원하지 않는 카테고리입니다: ${slug}`);
+  }
+
+  const items = await searchNaverNews(query, limit, "date");
   if (items.length === 0) return [];
 
   return Promise.all(items.map((item, index) => withOgImage(toNewsArticle(item, category, index))));

@@ -1,6 +1,15 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import type { NewsArticle } from "@/types/news";
 import type { NewsCardLinkProps } from "../news.types";
+
+/**
+ * 카드가 실제로 이동할 목적지. 네이버 등 실제 API에서 온 기사는
+ * `externalUrl`(원문 링크)이 있고, mock 기사는 자체 상세 페이지로 간다.
+ */
+export function getArticleHref(article: Pick<NewsArticle, "slug" | "externalUrl">): string {
+  return article.externalUrl ?? `/news/${article.slug}`;
+}
 
 /**
  * "Stretched link" 패턴으로 카드 전체 클릭 영역을 만드는 primitive

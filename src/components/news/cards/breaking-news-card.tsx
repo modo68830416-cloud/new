@@ -8,7 +8,7 @@ import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { designSystemConfig } from "@/config/design-system";
 import { NewsShareButton } from "../primitives/news-share-button";
 import { NewsTitle } from "../primitives/news-title";
-import { NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
+import { getArticleHref, NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
 import { cn } from "@/lib/utils";
 import type { BreakingNewsLevel, NewsCardBaseProps, NewsTitleLevel } from "../news.types";
 
@@ -72,7 +72,7 @@ export function BreakingNewsCard({
         </div>
 
         <NewsTitle level={titleLevel} size="md" lineClamp={2}>
-          <NewsCardLink href={`/news/${article.slug}`}>{article.title}</NewsCardLink>
+          <NewsCardLink href={getArticleHref(article)}>{article.title}</NewsCardLink>
         </NewsTitle>
 
         <p className="type-metadata flex items-center gap-1.5 text-text-muted">

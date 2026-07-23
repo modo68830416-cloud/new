@@ -6,11 +6,11 @@ import { LiveBadge } from "@/components/ui/live-badge";
 import { LinkButton } from "@/components/ui/link-button";
 import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { NewsShareButton } from "../primitives/news-share-button";
-import { NewsImage } from "../primitives/news-image";
+import { isPlaceholderThumbnail, NewsImage, PlaceholderTitleOverlay } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsSummary } from "../primitives/news-summary";
 import { NewsCardMeta } from "../primitives/news-meta";
-import { NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
+import { getArticleHref, NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
 import { cn } from "@/lib/utils";
 import type { NewsCardBaseProps, NewsTitleLevel } from "../news.types";
 
@@ -53,6 +53,11 @@ export function FeaturedNewsCard({
           enableZoom
           sizes="(min-width: 1024px) 50vw, 100vw"
           className="md:w-1/2"
+          overlayContent={
+            isPlaceholderThumbnail(article.thumbnail.url) ? (
+              <PlaceholderTitleOverlay title={article.title} />
+            ) : undefined
+          }
         />
         <div className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
           <div className="flex flex-wrap items-center gap-2">
@@ -71,7 +76,7 @@ export function FeaturedNewsCard({
           </div>
 
           <NewsTitle level={titleLevel} size="xl" lineClamp={3}>
-            <NewsCardLink href={`/news/${article.slug}`}>{article.title}</NewsCardLink>
+            <NewsCardLink href={getArticleHref(article)}>{article.title}</NewsCardLink>
           </NewsTitle>
 
           {showSummary && article.summary && (

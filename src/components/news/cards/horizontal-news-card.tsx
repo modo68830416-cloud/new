@@ -6,7 +6,7 @@ import { NewsImage } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsSummary } from "../primitives/news-summary";
 import { NewsCardMeta } from "../primitives/news-meta";
-import { NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
+import { getArticleHref, NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
 import { cn } from "@/lib/utils";
 import type { NewsCardBaseProps, NewsTitleLevel } from "../news.types";
 
@@ -68,7 +68,7 @@ export function HorizontalNewsCard({
             size={size === "sm" ? "sm" : "md"}
             lineClamp={2}
           >
-            <NewsCardLink href={`/news/${article.slug}`}>{article.title}</NewsCardLink>
+            <NewsCardLink href={getArticleHref(article)}>{article.title}</NewsCardLink>
           </NewsTitle>
           {showSummary && article.summary && (
             <NewsSummary lineClamp={2} hideOnMobile className="hidden sm:block">

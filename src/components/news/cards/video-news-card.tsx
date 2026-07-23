@@ -4,10 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { CategoryBadge } from "@/components/ui/category-badge";
 import { BookmarkButton } from "@/components/personalization/bookmark-button";
 import { NewsShareButton } from "../primitives/news-share-button";
-import { NewsImage } from "../primitives/news-image";
+import { isPlaceholderThumbnail, NewsImage, PlaceholderTitleOverlay } from "../primitives/news-image";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsCardMeta } from "../primitives/news-meta";
-import { NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
+import { getArticleHref, NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
 import { cn } from "@/lib/utils";
 import type { NewsCardBaseProps, NewsTitleLevel } from "../news.types";
 
@@ -44,6 +44,9 @@ export function VideoNewsCard({
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           overlayContent={
             <>
+              {isPlaceholderThumbnail(article.thumbnail.url) && (
+                <PlaceholderTitleOverlay title={article.title} />
+              )}
               <span
                 role="img"
                 aria-label="동영상 재생"
@@ -72,7 +75,7 @@ export function VideoNewsCard({
             </div>
           </div>
           <NewsTitle level={titleLevel} size="md" lineClamp={2}>
-            <NewsCardLink href={`/news/${article.slug}`}>{article.title}</NewsCardLink>
+            <NewsCardLink href={getArticleHref(article)}>{article.title}</NewsCardLink>
           </NewsTitle>
           <NewsCardMeta
             publishedAt={article.publishedAt}

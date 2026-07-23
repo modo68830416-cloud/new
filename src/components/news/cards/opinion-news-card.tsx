@@ -6,7 +6,7 @@ import { NewsShareButton } from "../primitives/news-share-button";
 import { NewsTitle } from "../primitives/news-title";
 import { NewsSummary } from "../primitives/news-summary";
 import { NewsSourceLine } from "../primitives/news-source";
-import { NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
+import { getArticleHref, NewsCardLink, newsCardContainerClassName } from "../primitives/news-card-link";
 import { cn } from "@/lib/utils";
 import type { NewsCardBaseProps, NewsTitleLevel } from "../news.types";
 
@@ -41,7 +41,7 @@ export function OpinionNewsCard({
         </div>
 
         <NewsTitle level={titleLevel} size="md" lineClamp={3}>
-          <NewsCardLink href={`/news/${article.slug}`}>{article.title}</NewsCardLink>
+          <NewsCardLink href={getArticleHref(article)}>{article.title}</NewsCardLink>
         </NewsTitle>
 
         {showSummary && article.summary && (
