@@ -79,6 +79,13 @@ export interface NewsArticle {
   duration?: string;
 
   /**
+   * 실제 뉴스 API(네이버 뉴스 검색)에서 가져온 기사의 원문 URL.
+   * 값이 있으면 자체 상세 페이지(`/news/[slug]`) 대신 이 URL로 연결한다 —
+   * 원문 저작권 때문에 본문을 재구성하지 않고 출처로 안내하는 방식이다.
+   */
+  externalUrl?: string;
+
+  /**
    * TASK-009에서 추가한 선택 필드. 뉴스 상세 페이지(`/news/[slug]`) 전용이며
    * 값이 없어도(undefined) 카드/리스트/그리드(TASK-007) 렌더링에는 아무
    * 영향이 없다 — 실제 CMS 연동 없이 mock 데이터로만 채운다.

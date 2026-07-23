@@ -40,7 +40,9 @@ export function SecondaryNewsGrid({ articles, className }: SecondaryNewsGridProp
     <div
       className={cn("grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6", className)}
     >
-      {items.map((article, index) => (
+      {items.map((article, index) => {
+        const href = article.externalUrl ?? `/news/${article.slug}`;
+        return (
         <SlideUp
           key={article.id}
           delay={index * 0.06}
@@ -68,18 +70,19 @@ export function SecondaryNewsGrid({ articles, className }: SecondaryNewsGridProp
             <div className="flex flex-1 flex-col gap-2 p-4">
               <CategoryBadge category={article.category} size="sm" />
               <h3 className="type-card-title line-clamp-2 text-text-primary">
-                <NewsCardLink href={`/news/${article.slug}`}>{article.title}</NewsCardLink>
+                <NewsCardLink href={href}>{article.title}</NewsCardLink>
               </h3>
               <NewsMeta
                 publishedAt={article.publishedAt}
-                viewCount={article.viewCount}
+                viewCount={article.externalUrl ? undefined : article.viewCount}
                 showCategory={false}
                 className="mt-auto pt-1"
               />
             </div>
           </Card>
         </SlideUp>
-      ))}
+        );
+      })}
     </div>
   );
 }

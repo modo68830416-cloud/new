@@ -38,10 +38,14 @@ export function NewsCardLink({
     );
   }
 
+  const isExternal = /^https?:\/\//.test(href);
+
   return (
     <Link
       href={href}
       prefetch={prefetch}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
       className={cn(
         "pointer-events-auto rounded-[inherit] outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]",
         "hover:text-accent-primary",

@@ -10,6 +10,11 @@ import {
 import { getArticlesByTagSlug } from "@/data/mock-search";
 import { getFeaturedHeroArticle, getSecondaryHeroArticles } from "@/lib/hero-articles";
 import { simulateNetwork } from "./simulate";
+import {
+  fetchNaverFeaturedArticle,
+  fetchNaverSecondaryArticles,
+  isNaverNewsConfigured,
+} from "./naver";
 import type { NewsArticle } from "@/types/news";
 
 /**
@@ -66,7 +71,20 @@ export const fetchArticlesByTagSlug = cache(async function fetchArticlesByTagSlu
   return getArticlesByTagSlug(slug);
 });
 
+/**
+ * 네이버 뉴스 API 키(`NAVER_CLIENT_ID`/`NAVER_CLIENT_SECRET`)가 설정돼 있으면
+ * 실시간 뉴스를 가져오고, 키가 없거나 호출이 실패하면 mock 데이터로
+ * 자연스럽게 폴백한다 — 홈페이지가 외부 API 장애로 깨지지 않도록 한다.
+ */
 export const fetchFeaturedHeroArticle = cache(async function fetchFeaturedHeroArticle(): Promise<NewsArticle> {
+  if (isNaverNewsConfigured()) {
+    try {
+      return await fetchNaverFeaturedArticle();
+    } catch (error) {
+      console.error("[news-api] 네이버 뉴스(Featured) 조회 실패, mock으로 폴백:", error);
+    }
+  }
+
   await simulateNetwork();
   return getFeaturedHeroArticle();
 });
@@ -74,6 +92,14 @@ export const fetchFeaturedHeroArticle = cache(async function fetchFeaturedHeroAr
 export const fetchSecondaryHeroArticles = cache(async function fetchSecondaryHeroArticles(
   limit = 6,
 ): Promise<NewsArticle[]> {
+  if (isNaverNewsConfigured()) {
+    try {
+      return await fetchNaverSecondaryArticles(limit);
+    } catch (error) {
+      console.error("[news-api] 네이버 뉴스(Secondary) 조회 실패, mock으로 폴백:", error);
+    }
+  }
+
   await simulateNetwork();
   return getSecondaryHeroArticles(limit);
 });

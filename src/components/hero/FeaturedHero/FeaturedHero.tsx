@@ -31,6 +31,7 @@ import type { FeaturedHeroProps } from "./FeaturedHero.types";
 export function FeaturedHero({ article, className }: FeaturedHeroProps) {
   const featured = article ?? getFeaturedHeroArticle();
   const image = featured.heroImage ?? featured.thumbnail;
+  const href = featured.externalUrl ?? `/news/${featured.slug}`;
 
   return (
     <FadeIn className={cn("h-full", className)}>
@@ -66,7 +67,7 @@ export function FeaturedHero({ article, className }: FeaturedHeroProps) {
           </div>
 
           <h2 className="type-hero-title line-clamp-3 break-keep text-text-primary">
-            <NewsCardLink href={`/news/${featured.slug}`}>{featured.title}</NewsCardLink>
+            <NewsCardLink href={href}>{featured.title}</NewsCardLink>
           </h2>
 
           <p className="type-body line-clamp-2 max-w-2xl text-text-secondary sm:line-clamp-3">
@@ -80,21 +81,24 @@ export function FeaturedHero({ article, className }: FeaturedHeroProps) {
               </span>
             )}
             <TimeAgo date={featured.publishedAt} className="text-text-secondary" />
-            <ViewCount count={featured.viewCount} className="text-text-secondary" />
+            {!featured.externalUrl && (
+              <ViewCount count={featured.viewCount} className="text-text-secondary" />
+            )}
           </div>
 
           <div className="relative z-sticky mt-2 flex items-center gap-3">
             <LinkButton
-              href={`/news/${featured.slug}`}
+              href={href}
               variant="primary"
               rightIcon={<ArrowRight size={16} aria-hidden />}
               className="shadow-glow"
+              {...(featured.externalUrl ? { target: "_blank", rel: "noopener noreferrer" } : {})}
             >
               기사 읽기
             </LinkButton>
             <FeaturedHeroShareButton
               title={featured.title}
-              url={`${siteConfig.siteUrl}/news/${featured.slug}`}
+              url={featured.externalUrl ?? `${siteConfig.siteUrl}/news/${featured.slug}`}
             />
           </div>
         </div>
