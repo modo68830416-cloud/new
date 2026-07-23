@@ -76,8 +76,28 @@ function placeholderThumbnail(categorySlug: string, alt: string) {
   };
 }
 
-const OG_IMAGE_PATTERN =
-  /<meta[^>]+(?:property|name)=["'](?:og:image(?::secure_url)?|twitter:image)["'][^>]+content=["']([^"']+)["']/i;
+const META_TAG_PATTERN = /<meta\b[^>]*>/gi;
+const OG_IMAGE_NAME_PATTERN =
+  /(?:property|name)\s*=\s*["'](?:og:image(?::secure_url|:url)?|twitter:image(?::src)?)["']/i;
+const CONTENT_ATTR_PATTERN = /content\s*=\s*["']([^"']+)["']/i;
+
+/**
+ * HTML 문자열에서 og:image(또는 twitter:image) 메타 태그의 content를 찾는다.
+ *
+ * `<meta property="og:image" content="...">`와 `<meta content="..."
+ * property="og:image">`처럼 속성 순서가 사이트마다 달라서, 정규식 하나로
+ * "property 다음에 content"를 가정하면 절반 가까이 놓친다 — 태그 단위로
+ * 쪼갠 뒤 두 속성을 순서 무관하게 각각 찾는다.
+ */
+function extractOgImage(html: string): string | undefined {
+  const metaTags = html.match(META_TAG_PATTERN) ?? [];
+  for (const tag of metaTags) {
+    if (!OG_IMAGE_NAME_PATTERN.test(tag)) continue;
+    const contentMatch = tag.match(CONTENT_ATTR_PATTERN);
+    if (contentMatch) return contentMatch[1];
+  }
+  return undefined;
+}
 
 /**
  * 원문 기사 페이지에서 Open Graph 이미지를 추출한다.
@@ -90,7 +110,7 @@ const OG_IMAGE_PATTERN =
  */
 async function fetchOgImage(pageUrl: string): Promise<string | undefined> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 3000);
+  const timeout = setTimeout(() => controller.abort(), 4000);
 
   try {
     const response = await fetch(pageUrl, {
@@ -110,18 +130,23 @@ async function fetchOgImage(pageUrl: string): Promise<string | undefined> {
 
     const decoder = new TextDecoder();
     let html = "";
-    while (html.length < 60_000) {
+    while (html.length < 150_000) {
       const { done, value } = await reader.read();
       if (done) break;
       html += decoder.decode(value, { stream: true });
-      const match = html.match(OG_IMAGE_PATTERN);
+
+      if (/<\/head>/i.test(html)) break;
+
+      const match = extractOgImage(html);
       if (match) {
         reader.cancel().catch(() => {});
-        return new URL(match[1], pageUrl).toString();
+        return new URL(match, pageUrl).toString();
       }
     }
     reader.cancel().catch(() => {});
-    return undefined;
+
+    const finalMatch = extractOgImage(html);
+    return finalMatch ? new URL(finalMatch, pageUrl).toString() : undefined;
   } catch {
     return undefined;
   } finally {
@@ -163,6 +188,29 @@ async function withOgImage(article: NewsArticle): Promise<NewsArticle> {
   };
 }
 
+/**
+ * 후보 기사 여러 건 중 og:image를 실제로 구할 수 있는 첫 번째를 고른다.
+ *
+ * 검색 결과 1건만 보면 그 사이트가 하필 og:image가 없을 때 대표 자리(특히
+ * Featured Hero)가 그라데이션 placeholder로만 채워지는 일이 잦았다. 후보를
+ * 여러 개(`display`) 받아 각각 og:image 유무를 병렬로 확인하고, 이미지가
+ * 있는 첫 기사를 우선 채택한다 — 모두 실패하면 그냥 1번째 기사를
+ * placeholder로 사용한다.
+ */
+async function pickArticleWithImage(
+  items: NaverNewsItem[],
+  category: NewsCategory,
+  index: number,
+): Promise<NewsArticle> {
+  const candidates = await Promise.all(
+    items.map((item) => withOgImage(toNewsArticle(item, category, index))),
+  );
+
+  return (
+    candidates.find((candidate) => candidate.thumbnail.url.startsWith("http")) ?? candidates[0]
+  );
+}
+
 async function searchNaverNews(query: string, display: number): Promise<NaverNewsItem[]> {
   const clientId = process.env.NAVER_CLIENT_ID;
   const clientSecret = process.env.NAVER_CLIENT_SECRET;
@@ -196,13 +244,12 @@ export async function fetchNaverFeaturedArticle(): Promise<NewsArticle> {
     throw new NewsApiError("breaking 카테고리를 찾을 수 없습니다.");
   }
 
-  const items = await searchNaverNews("속보", 1);
-  const [item] = items;
-  if (!item) {
+  const items = await searchNaverNews("속보", 5);
+  if (items.length === 0) {
     throw new NewsApiError("네이버 뉴스 검색 결과가 없습니다.");
   }
 
-  const article = await withOgImage(toNewsArticle(item, category, 0));
+  const article = await pickArticleWithImage(items, category, 0);
   return { ...article, isFeatured: true, isBreaking: true };
 }
 
@@ -215,11 +262,10 @@ export async function fetchNaverSecondaryArticles(limit = 6): Promise<NewsArticl
       const category = getCategoryBySlug(slug);
       if (!category) return null;
 
-      const items = await searchNaverNews(query, 1);
-      const [item] = items;
-      if (!item) return null;
+      const items = await searchNaverNews(query, 4);
+      if (items.length === 0) return null;
 
-      return withOgImage(toNewsArticle(item, category, index));
+      return pickArticleWithImage(items, category, index);
     }),
   );
 
