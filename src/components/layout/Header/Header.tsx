@@ -103,7 +103,13 @@ export function Header({ className }: HeaderProps) {
           </div>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <LiveBadge className="hidden md:inline-flex" />
+            <Link
+              href="/live"
+              className="hidden rounded-full transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:inline-flex"
+              aria-label="실시간 뉴스 생중계 보기"
+            >
+              <LiveBadge />
+            </Link>
 
             <div role="search" className="contents">
               {searchOpen ? (
