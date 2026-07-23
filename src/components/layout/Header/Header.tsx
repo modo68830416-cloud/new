@@ -88,7 +88,7 @@ export function Header({ className }: HeaderProps) {
       >
         <div
           aria-hidden
-          className="bg-gradient-brand pointer-events-none absolute inset-0 opacity-[0.08] dark:opacity-[0.16]"
+          className="bg-gradient-brand pointer-events-none absolute inset-0 opacity-[0.45] dark:opacity-[0.6]"
         />
 
         <div
